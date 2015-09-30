@@ -18,9 +18,19 @@ public class AuthorizationService {
         this.store = store;
     }
 
+    public String readPassword(final String message) {
+        String result = null;
+        while(result == null || result.length() == 0) {
+            System.out.println(message);
+            Console console = System.console();
+            result = new String(console.readPassword());
+        }
+        return result;
+    }
+
     public String readString(final String message) {
         String result = null;
-        while (result == null) {
+        while (result == null || result.length() == 0) {
             System.out.println(message);
             Scanner scan = new Scanner(System.in);
             result = scan.nextLine();
@@ -31,7 +41,7 @@ public class AuthorizationService {
 
     public void authorize() throws Exception {
         String userName = readString("enter your username");
-        String password = readString("enter your password");
+        String password = readPassword("enter your password");
 
         if (store.isUserExist(userName)) {
             user = store.getUser(userName, password);
@@ -48,10 +58,19 @@ public class AuthorizationService {
     }
 
     public void createUser() throws Exception {
-        String userName = readString("enter your new username");
-        String password = readString("enter your password");
-        user = new User(userName, password);
-        logged = true;
-        store.addUser(user);
+
+        while(true) {
+            String userName = readString("enter your new username");
+            String password = readPassword("enter your password");
+            if (store.isUserExist(userName)) {
+                System.out.println("such user already exists: " + userName);
+                continue;
+            }
+            System.out.println("registered succesfully: " + userName);
+            user = new User(userName, password);
+            logged = true;
+            store.addUser(user);
+            break;
+        }
     }
 }

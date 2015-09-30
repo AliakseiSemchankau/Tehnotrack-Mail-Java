@@ -11,12 +11,14 @@ public class User {
     private String userName;
     private byte[] hash;
 
+    /*
     public static void printHash(final byte[] bytes) {
         for(int i= 0; i< 32; ++i) {
             System.out.print(bytes[i] + " ");
         }
         System.out.println();
     }
+    */
 
     public static byte[] calcHash(final String str) throws Exception {
         MessageDigest md = MessageDigest.getInstance("SHA-256");

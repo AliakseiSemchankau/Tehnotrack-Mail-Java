@@ -22,12 +22,10 @@ public class UserStorage {
                 String currentUserName = br.readLine();
 
                 if (currentUserName != null) {
-                    //System.out.println(currentUserName + "+" + currentPassWord + "\n");
                     byte[] currentHash = new byte[32];
                     fis.read(currentHash);
                     users.put(currentUserName, new User(currentUserName, currentHash));
                 } else {
-                    //System.out.println("the end");
                     break;
                 }
             }
@@ -60,7 +58,6 @@ public class UserStorage {
         for (Map.Entry<String, User> entry : users.entrySet()) {
             String currentUserName = entry.getKey();
             byte[] currentHash = entry.getValue().getHash();
-            //System.out.println(currentUserName + " " + currentPassword + "\n");
             bw.write(currentUserName + "\n");
             fos.write(currentHash);
         }
