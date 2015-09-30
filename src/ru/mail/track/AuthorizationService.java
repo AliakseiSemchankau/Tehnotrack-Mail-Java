@@ -39,6 +39,19 @@ public class AuthorizationService {
         return result;
     }
 
+    public void start() throws Exception{
+
+        String wish = readString("press 'a' if you'd like to authorize and 'r' for registering");
+        if (wish.equals("a")) {
+            authorize();
+        } else if (wish.equals("r")) {
+            createUser();
+        } else {
+            System.out.println("there are no such option: " + wish);
+        }
+
+    }
+
     public void authorize() throws Exception {
         String userName = readString("enter your username");
         String password = readPassword("enter your password");
@@ -52,8 +65,7 @@ public class AuthorizationService {
                 System.out.println("Password for User " + userName + " is incorrect:(");
             }
         } else {
-            System.out.println("Register please");
-            createUser();
+            System.out.println("This user is unregistered");
         }
     }
 

@@ -10,7 +10,7 @@ public class Main {
     public static void main(String... argc) throws Exception {
         UserStorage store = new UserStorage("logins.txt", "passwords.txt");
         AuthorizationService service = new AuthorizationService(store);
-        service.authorize();
+        service.start();
         store.close("logins.txt", "passwords.txt");
     }
 
