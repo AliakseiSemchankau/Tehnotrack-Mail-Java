@@ -1,6 +1,8 @@
 package ru.mail.track;
 
-import java.io.*;
+import java.io.Console;
+import java.security.MessageDigest;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Scanner;
@@ -11,16 +13,35 @@ import java.util.Scanner;
 public class AuthorizationService {
 
     private UserStorage store;
-    boolean logged = false;
-    User user = null;
+    private static MessageDigest md;
+
+    public static byte[] calcHash(final String str) throws Exception {
+        if (md == null) {
+            md = MessageDigest.getInstance("SHA-256");
+        }
+        md.update(str.getBytes("UTF-8")); // Change this to "UTF-16" if needed
+        return md.digest();
+    }
+
+    public static boolean isCorrect(User user, String word) throws Exception {
+
+        if (word == null) {
+            return false;
+        }
+
+        byte[] hash = user.getHash();
+        byte[] newHash = AuthorizationService.calcHash(word);
+
+        return Arrays.equals(hash, newHash);
+    }
 
     public AuthorizationService(UserStorage store) {
         this.store = store;
     }
 
-    public String readPassword(final String message) {
+    private String readPassword(final String message) {
         String result = null;
-        while(result == null || result.length() == 0) {
+        while (result == null || result.length() == 0) {
             System.out.println(message);
             Console console = System.console();
             result = new String(console.readPassword());
@@ -28,7 +49,7 @@ public class AuthorizationService {
         return result;
     }
 
-    public String readString(final String message) {
+    private String readString(final String message) {
         String result = null;
         while (result == null || result.length() == 0) {
             System.out.println(message);
@@ -39,39 +60,62 @@ public class AuthorizationService {
         return result;
     }
 
-    public void start() throws Exception{
+    public void start() throws Exception {
 
-        String wish = readString("press 'a' if you'd like to authorize and 'r' for registering");
+        String wish = readString("press 'a' for authorizing, 'r' for registering or 'q' for quit");
+
         if (wish.equals("a")) {
             authorize();
-        } else if (wish.equals("r")) {
-            createUser();
-        } else {
-            System.out.println("there are no such option: " + wish);
+            return;
         }
 
+        if (wish.equals("r")) {
+            createUser();
+            return;
+        }
+
+        if (wish.equals("q")) {
+            return;
+        }
+
+        System.out.println("there is no such option: " + wish);
     }
 
-    public void authorize() throws Exception {
+    public User authorize() throws Exception {
         String userName = readString("enter your username");
         String password = readPassword("enter your password");
 
         if (store.isUserExist(userName)) {
-            user = store.getUser(userName, password);
+            User user = store.getUser(userName, password);
             if (user != null) {
-                logged = true;
                 System.out.println("Done! User " + userName + " is authorized");
+                return user;
             } else {
                 System.out.println("Password for User " + userName + " is incorrect:(");
+                return null;
             }
         } else {
             System.out.println("This user is unregistered");
+            System.out.println();
+            String wish = readString("Print 'r' if you'd like to register or 'q' if you want to quit");
+
+            if (wish.equals("r")) {
+                return createUser();
+            }
+
+            if (wish.equals("q")) {
+                return null;
+            }
+
+            System.out.println("there is no such option: " + wish);
+            return null;
         }
+
     }
 
-    public void createUser() throws Exception {
+    public User createUser() throws Exception {
 
-        while(true) {
+        while (true) {
             String userName = readString("enter your new username");
             String password = readPassword("enter your password");
             if (store.isUserExist(userName)) {
@@ -79,10 +123,9 @@ public class AuthorizationService {
                 continue;
             }
             System.out.println("registered succesfully: " + userName);
-            user = new User(userName, password);
-            logged = true;
+            User user = new User(userName, password);
             store.addUser(user);
-            break;
+            return user;
         }
     }
 }

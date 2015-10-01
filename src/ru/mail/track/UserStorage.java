@@ -1,35 +1,28 @@
 package ru.mail.track;
 
-import java.io.*;
+import java.io.BufferedWriter;
+import java.io.FileOutputStream;
+import java.io.BufferedReader;
+import java.io.FileWriter;
+import java.io.FileInputStream;
+import java.io.FileReader;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Scanner;
 
 /**
  * Created by aliakseisemchankau on 29.9.15.
  */
 public class UserStorage {
 
+    private String fileLogins;
+    private String filePasswords;
+
     Map<String, User> users;
 
     public UserStorage(final String fileLogins, final String filePasswords) throws Exception {
+        this.fileLogins = fileLogins;
+        this.filePasswords = filePasswords;
         users = new HashMap<>();
-
-        BufferedReader br = new BufferedReader(new FileReader(fileLogins));
-        FileInputStream fis = new FileInputStream(filePasswords);
-
-            while (true) {
-                String currentUserName = br.readLine();
-
-                if (currentUserName != null) {
-                    byte[] currentHash = new byte[32];
-                    fis.read(currentHash);
-                    users.put(currentUserName, new User(currentUserName, currentHash));
-                } else {
-                    break;
-                }
-            }
-            br.close();
     }
 
 
@@ -38,20 +31,47 @@ public class UserStorage {
     }
 
     // Добавить пользователя в хранилище
-    void addUser(User user) {
+    void addUser(User user) throws Exception{
         users.put(user.getName(), user);
+        reload();
     }
 
     // Получить пользователя по имени и паролю
     User getUser(String name, String pass) throws Exception {
-        if (isUserExist(name) && users.get(name).isCorrect(pass)) {
+        if (isUserExist(name) && AuthorizationService.isCorrect(users.get(name), pass)) {
             return users.get(name);
-    } else {
-            return null;
         }
-}
+        return null;
+    }
 
-    public void close(final String fileLogins, final String filePasswords) throws IOException{
+    public void reload() throws Exception{
+        close();
+        open();
+    }
+
+    public void open() throws Exception {
+
+        BufferedReader br = new BufferedReader(new FileReader(fileLogins));
+        FileInputStream fis = new FileInputStream(filePasswords);
+
+        users = new HashMap<>();
+
+        while (true) {
+            String currentUserName = br.readLine();
+
+            if (currentUserName != null) {
+                byte[] currentHash = new byte[32];
+                fis.read(currentHash);
+                users.put(currentUserName, new User(currentUserName, currentHash));
+            } else {
+                break;
+            }
+        }
+        br.close();
+        fis.close();
+    }
+
+    public void close() throws Exception {
 
         BufferedWriter bw = new BufferedWriter(new FileWriter(fileLogins));
         FileOutputStream fos = new FileOutputStream(filePasswords);

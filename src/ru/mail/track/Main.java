@@ -7,11 +7,12 @@ import java.io.IOException;
  */
 public class Main {
 
-    public static void main(String... argc) throws Exception {
+    public static void main(String[] args) throws Exception {
         UserStorage store = new UserStorage("logins.txt", "passwords.txt");
+        store.open();
         AuthorizationService service = new AuthorizationService(store);
         service.start();
-        store.close("logins.txt", "passwords.txt");
+        store.close();
     }
 
 }
