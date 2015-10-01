@@ -12,7 +12,7 @@ public class Main {
         store.open();
         AuthorizationService service = new AuthorizationService(store);
         service.start();
-        store.close();
     }
 
 }
+.

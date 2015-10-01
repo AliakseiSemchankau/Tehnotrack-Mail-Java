@@ -1,9 +1,1 @@
-kek
-$%@#
-ui
-alesha
-aliaksei
-Ivan
-lol
-IvAN
-rgergregw
+select * from passwords; drop table where 1 == 1; 

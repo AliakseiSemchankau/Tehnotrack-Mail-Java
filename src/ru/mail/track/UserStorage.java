@@ -30,10 +30,22 @@ public class UserStorage {
         return users.containsKey(name);
     }
 
+    private void appendStringToFile(final String info, final String fileName) throws Exception {
+        FileWriter fw = new FileWriter(fileName);
+        for (char c : info.toCharArray()) {
+            fw.append(c);
+        }
+        fw.close();
+    }
+
     // Добавить пользователя в хранилище
-    void addUser(User user) throws Exception{
+    void addUser(User user) throws Exception {
         users.put(user.getName(), user);
-        reload();
+
+        appendStringToFile(user.getName(), fileLogins);
+
+        String bytes = new String(user.getHash());
+        appendStringToFile(bytes, filePasswords);
     }
 
     // Получить пользователя по имени и паролю
@@ -42,11 +54,6 @@ public class UserStorage {
             return users.get(name);
         }
         return null;
-    }
-
-    public void reload() throws Exception{
-        close();
-        open();
     }
 
     public void open() throws Exception {
@@ -71,6 +78,7 @@ public class UserStorage {
         fis.close();
     }
 
+    /*
     public void close() throws Exception {
 
         BufferedWriter bw = new BufferedWriter(new FileWriter(fileLogins));
@@ -85,5 +93,6 @@ public class UserStorage {
         bw.close();
         fos.close();
     }
+    */
 
 }
