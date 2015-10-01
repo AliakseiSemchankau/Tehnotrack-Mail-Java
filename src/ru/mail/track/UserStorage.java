@@ -1,11 +1,6 @@
 package ru.mail.track;
 
-import java.io.BufferedWriter;
-import java.io.FileOutputStream;
-import java.io.BufferedReader;
-import java.io.FileWriter;
-import java.io.FileInputStream;
-import java.io.FileReader;
+import java.io.*;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -31,21 +26,23 @@ public class UserStorage {
     }
 
     private void appendStringToFile(final String info, final String fileName) throws Exception {
-        FileWriter fw = new FileWriter(fileName);
-        for (char c : info.toCharArray()) {
-            fw.append(c);
-        }
-        fw.close();
+        RandomAccessFile raf = new RandomAccessFile(fileName, "rw");
+        raf.skipBytes((int)raf.length());
+        raf.writeBytes(info);
+        raf.writeBytes("\n");
+    }
+
+    private void appendPasswordToFile(final byte[] info, final String fileName) throws Exception {
+        RandomAccessFile raf = new RandomAccessFile(fileName, "rw");
+        raf.skipBytes((int)raf.length());
+        raf.write(info);
     }
 
     // Добавить пользователя в хранилище
     void addUser(User user) throws Exception {
         users.put(user.getName(), user);
-
         appendStringToFile(user.getName(), fileLogins);
-
-        String bytes = new String(user.getHash());
-        appendStringToFile(bytes, filePasswords);
+        appendPasswordToFile(user.getHash(), filePasswords);
     }
 
     // Получить пользователя по имени и паролю
@@ -69,6 +66,11 @@ public class UserStorage {
             if (currentUserName != null) {
                 byte[] currentHash = new byte[32];
                 fis.read(currentHash);
+                System.out.println(currentUserName);
+                for(int i = 0; i < 32; ++i) {
+                    System.out.print(currentHash[i]);
+                }
+                System.out.println();
                 users.put(currentUserName, new User(currentUserName, currentHash));
             } else {
                 break;
