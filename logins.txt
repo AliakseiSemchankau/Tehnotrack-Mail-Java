@@ -1,0 +1,6 @@
+aliaksei
+ivan
+select * from passwords;
+select 
+nata
+natan
