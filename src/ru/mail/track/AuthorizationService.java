@@ -3,8 +3,6 @@ package ru.mail.track;
 import java.io.Console;
 import java.security.MessageDigest;
 import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Scanner;
 
 /**
@@ -16,17 +14,13 @@ public class AuthorizationService {
     private static MessageDigest md;
 
     public static byte[] calcHash(final String str) throws Exception {
-        System.out.println("str = {" + str + "}");
+
         if (md == null) {
             md = MessageDigest.getInstance("SHA-256");
         }
-        md.update(str.getBytes("UTF-8")); // Change this to "UTF-16" if needed
-        for(int i = 0; i < 32; ++i) {
-            System.out.print(md.digest()[i]);
-        }
-        System.out.println();
-        return md.digest();
+        md.update(str.getBytes("UTF-8"));
 
+        return md.digest();
     }
 
     public static boolean isCorrect(User user, String word) throws Exception {
@@ -35,20 +29,8 @@ public class AuthorizationService {
             return false;
         }
 
-        System.out.println("word = " + word + "}");
-
         byte[] hash = user.getHash();
         byte[] newHash = AuthorizationService.calcHash(word);
-
-        for(int i = 0; i < 32; ++i)
-            System.out.print(hash[i]);
-
-        System.out.println();
-
-        for(int i = 0; i < 32; ++i)
-            System.out.print(newHash[i]);
-
-        System.out.println();
 
         return Arrays.equals(hash, newHash);
     }

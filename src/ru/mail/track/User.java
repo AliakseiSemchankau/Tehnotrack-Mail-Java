@@ -14,7 +14,6 @@ public class User {
     public User(final String userName, final String password) throws Exception{
         this.userName = userName;
         hash = AuthorizationService.calcHash(password);
-        //System.out.println(hash + " - hash for " + userName + "+" + password);
     }
 
     public User(final String userName, final byte[] hash) throws Exception {

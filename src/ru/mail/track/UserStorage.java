@@ -30,12 +30,14 @@ public class UserStorage {
         raf.skipBytes((int)raf.length());
         raf.writeBytes(info);
         raf.writeBytes("\n");
+        raf.close();
     }
 
     private void appendPasswordToFile(final byte[] info, final String fileName) throws Exception {
         RandomAccessFile raf = new RandomAccessFile(fileName, "rw");
         raf.skipBytes((int)raf.length());
         raf.write(info);
+        raf.close();
     }
 
     // Добавить пользователя в хранилище
@@ -66,11 +68,6 @@ public class UserStorage {
             if (currentUserName != null) {
                 byte[] currentHash = new byte[32];
                 fis.read(currentHash);
-                System.out.println(currentUserName);
-                for(int i = 0; i < 32; ++i) {
-                    System.out.print(currentHash[i]);
-                }
-                System.out.println();
                 users.put(currentUserName, new User(currentUserName, currentHash));
             } else {
                 break;
@@ -79,22 +76,5 @@ public class UserStorage {
         br.close();
         fis.close();
     }
-
-    /*
-    public void close() throws Exception {
-
-        BufferedWriter bw = new BufferedWriter(new FileWriter(fileLogins));
-        FileOutputStream fos = new FileOutputStream(filePasswords);
-        for (Map.Entry<String, User> entry : users.entrySet()) {
-            String currentUserName = entry.getKey();
-            byte[] currentHash = entry.getValue().getHash();
-            bw.write(currentUserName + "\n");
-            fos.write(currentHash);
-        }
-
-        bw.close();
-        fos.close();
-    }
-    */
 
 }
