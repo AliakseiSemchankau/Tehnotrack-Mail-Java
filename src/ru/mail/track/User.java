@@ -10,6 +10,7 @@ public class User {
 
     private String userName;
     private byte[] hash;
+    private String nickName;
 
     public User(final String userName, final String password) throws Exception{
         this.userName = userName;
@@ -27,6 +28,14 @@ public class User {
 
     public byte[] getHash() {
         return hash;
+    }
+
+    public String getNickName() {
+        return nickName;
+    }
+
+    public void setNickName(final String newNickName) {
+        nickName = newNickName;
     }
 
 }

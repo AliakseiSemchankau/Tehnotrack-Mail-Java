@@ -15,7 +15,7 @@ public class Main {
 
         if (authService.getSuccess()) {
             User user = authService.getUser();
-            MessageService ms = new MessageService(user.getName(), store);
+            MessageService ms = new MessageService(user, store);
             ms.start();
         }
 

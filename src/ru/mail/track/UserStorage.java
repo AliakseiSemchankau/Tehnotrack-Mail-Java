@@ -1,5 +1,7 @@
 package ru.mail.track;
 
+import ru.mail.track.messageservice.Message;
+
 import java.io.*;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
@@ -19,7 +21,7 @@ public class UserStorage {
     private String fileLogins;
     private String filePasswords;
 
-    private Map<String, List<String>> commentHistory; // login -> list of comments
+    private Map<String, List<Message>> commentHistory; // login -> list of comments
 
     Map<String, User> users;
 
@@ -27,7 +29,7 @@ public class UserStorage {
         this.userInfoDirectory = userInfoDirectory;
         this.fileLogins = userInfoDirectory + "/logins.txt";
         this.filePasswords = userInfoDirectory + "/passwords.txt";
-        commentHistory = new TreeMap<String, List<String>>();
+        commentHistory = new TreeMap<String, List<Message>>();
 
      }
 
@@ -76,7 +78,6 @@ public class UserStorage {
 
         while (true) {
             String currentUserName = br.readLine();
-
             if (currentUserName != null) {
                 byte[] currentHash = new byte[32];
                 fis.read(currentHash);
@@ -90,27 +91,27 @@ public class UserStorage {
         fis.close();
 
         for(String userName : users.keySet()) {
-            ArrayList<String> userComments = readCommentsHistoryFromFile(userName);
+            ArrayList<Message> userComments = readCommentsHistoryFromFile(userName);
             commentHistory.put(userName, userComments);
         }
 
     }
 
-    ArrayList<String> readCommentsHistoryFromFile(final String userName) {
+    ArrayList<Message> readCommentsHistoryFromFile(final String userName) {
 
-
-
-        ArrayList<String> comments = new ArrayList<>();
+        ArrayList<Message> comments = new ArrayList<>();
 
         try {
             BufferedReader br = new BufferedReader(new FileReader(userInfoDirectory + "/" + userName + ".txt"));
+            String currentTime;
             String currentComment;
             while(true) {
+                currentTime = br.readLine();
                 currentComment = br.readLine();
-                if (currentComment == null) {
+                if (currentTime == null || currentComment == null) {
                     break;
                 }
-               comments.add(currentComment);
+               comments.add(new Message(currentComment, currentTime));
             }
         } catch (Exception exc) {
             return comments;
@@ -118,7 +119,7 @@ public class UserStorage {
         return comments;
     }
 
-    public List<String> getUserCommentHistory(String userName) {
+    public List<Message> getUserCommentHistory(String userName) {
 
         return commentHistory.get(userName);
 
@@ -127,10 +128,10 @@ public class UserStorage {
     public void close() throws Exception {
 
         for(String userName : commentHistory.keySet()) {
-            List<String> comments = commentHistory.get(userName);
+            List<Message> comments = commentHistory.get(userName);
             BufferedWriter bw = new BufferedWriter(new FileWriter(userInfoDirectory + "/" + userName + ".txt"));
-            for(String comment : comments) {
-                bw.write(comment + "\n");
+            for(Message comment : comments) {
+                bw.write(comment.getTimeStamp() + "\n" + comment.getMessage() + "\n");
             }
             bw.close();
         }

@@ -1,5 +1,6 @@
 package ru.mail.track.messageservice.perform;
 
+import ru.mail.track.messageservice.Message;
 import ru.mail.track.messageservice.MessageService;
 
 import java.util.List;
@@ -19,12 +20,12 @@ public class MessageServiceActionPerformerFind extends MessageServiceActionPerfo
         String pattern = cmd[1];
         pattern = ".*" + pattern + ".*";
 
-        List<String> comments = ms.getCommentsHistory();
+        List<Message> comments = ms.getCommentsHistory();
 
-        for(String comment: comments) {
+        for(Message comment: comments) {
             try {
-                if (comment.matches(pattern)) {
-                    System.out.println(comment);
+                if (comment.getMessage().matches(pattern)) {
+                    System.out.println(comment.getMessage());
                 }
             } catch (java.util.regex.PatternSyntaxException psExc) {
                 System.out.println("sorry, but " + pattern + " can't be parsed normally");

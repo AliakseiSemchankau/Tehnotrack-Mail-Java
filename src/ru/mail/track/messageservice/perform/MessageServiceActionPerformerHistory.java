@@ -1,5 +1,6 @@
 package ru.mail.track.messageservice.perform;
 
+import ru.mail.track.messageservice.Message;
 import ru.mail.track.messageservice.MessageService;
 
 import java.util.List;
@@ -11,7 +12,7 @@ public class MessageServiceActionPerformerHistory extends MessageServiceActionPe
     @Override
     public void perform(String[] cmd, MessageService ms) {
 
-        List<String> commentsHistory = ms.getCommentsHistory();
+        List<Message> commentsHistory = ms.getCommentsHistory();
 
         int countOfComments = commentsHistory.size();
 
@@ -22,7 +23,7 @@ public class MessageServiceActionPerformerHistory extends MessageServiceActionPe
         System.out.println("last " + countOfComments + " are:");
 
         for(int i = Math.max(commentsHistory.size() - countOfComments, 0); i < commentsHistory.size(); ++i) {
-            System.out.println(commentsHistory.get(i));
+            System.out.println(commentsHistory.get(i).getTimeStamp() + "\n" + commentsHistory.get(i).getMessage());
         }
 
     }

@@ -1,5 +1,6 @@
 package ru.mail.track.messageservice;
 
+import ru.mail.track.User;
 import ru.mail.track.UserStorage;
 import ru.mail.track.messageservice.perform.*;
 
@@ -15,14 +16,15 @@ import java.util.TreeMap;
  */
 public class MessageService {
 
-    List<String> commentsHistory;
-    String nickName;
+    List<Message> commentsHistory;
     boolean exit = false;
     Map<String, MessageServiceActionPerformer> commandPerformer = new TreeMap<>();
+    User user;
 
-    public MessageService(String userName, UserStorage store) {
-        commentsHistory = store.getUserCommentHistory(userName);
-        nickName = userName;
+
+    public MessageService(User user, UserStorage store) {
+        this.user = user;
+        commentsHistory = store.getUserCommentHistory(user.getName());
         commandPerformer.put("\\help", new MessageServiceActionPerformerHelp());
         commandPerformer.put("\\user", new MessageServiceActionPerformerUser());
         commandPerformer.put("\\history", new MessageServiceActionPerformerHistory());
@@ -43,7 +45,7 @@ public class MessageService {
             if (isCommand(curMessage)) {
                 perform(curMessage);
             } else {
-                commentsHistory.add(curMessage);
+                commentsHistory.add(new Message(curMessage));
             }
         }
 
@@ -66,18 +68,18 @@ public class MessageService {
     }
 
     public String getNickName(){
-        return nickName;
+        return user.getNickName();
     }
 
     public void setNickName(final String newNickName) {
-        this.nickName = newNickName;
+        user.setNickName(newNickName);
     }
 
     public void mustExit() {
         exit = true;
     }
 
-    public List<String> getCommentsHistory() {
+    public List<Message> getCommentsHistory() {
         return commentsHistory;
     }
 

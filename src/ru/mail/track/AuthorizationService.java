@@ -82,6 +82,7 @@ public class AuthorizationService {
         if (wish.equals("r")) {
             user = createUser();
             success = (user != null);
+            return;
         }
 
         if (wish.equals("q")) {
