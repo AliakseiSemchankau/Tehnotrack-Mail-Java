@@ -1,6 +1,7 @@
 package ru.mail.track;
 
-import java.io.Console;
+import ru.mail.track.messageservice.MessageService;
+
 import java.security.MessageDigest;
 import java.util.Arrays;
 import java.util.Scanner;
@@ -12,6 +13,10 @@ public class AuthorizationService {
 
     private UserStorage store;
     private static MessageDigest md;
+
+    private boolean success = false;
+
+    User user = null;
 
     public static byte[] calcHash(final String str) throws Exception {
 
@@ -43,8 +48,10 @@ public class AuthorizationService {
         String result = null;
         while (result == null || result.length() == 0) {
             System.out.println(message);
-            Console console = System.console();
-            result = new String(console.readPassword());
+            //Console console = System.console();
+            //result = new String(console.readPassword());
+            Scanner scan = new Scanner(System.in);
+            result = scan.nextLine();
         }
         return result;
     }
@@ -64,21 +71,27 @@ public class AuthorizationService {
 
         String wish = readString("press 'a' for authorizing, 'r' for registering or 'q' for quit");
 
+        boolean wishIsDone = false;
+
         if (wish.equals("a")) {
-            authorize();
+            user = authorize();
+            success = (user != null);
             return;
         }
 
         if (wish.equals("r")) {
-            createUser();
-            return;
+            user = createUser();
+            success = (user != null);
         }
 
         if (wish.equals("q")) {
             return;
         }
 
-        System.out.println("there is no such option: " + wish);
+        if (!wishIsDone) {
+            System.out.println("there is no such option: " + wish);
+        }
+
     }
 
     public User authorize() throws Exception {
@@ -128,4 +141,13 @@ public class AuthorizationService {
             return user;
         }
     }
+
+    boolean getSuccess() {
+        return success;
+    }
+
+    public User getUser() {
+        return user;
+    }
+
 }

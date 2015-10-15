@@ -1,24 +1,35 @@
 package ru.mail.track;
 
 import java.io.*;
+import java.lang.reflect.Array;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 
 /**
  * Created by aliakseisemchankau on 29.9.15.
  */
 public class UserStorage {
 
+    private String userInfoDirectory;
+
     private String fileLogins;
     private String filePasswords;
 
+    private Map<String, List<String>> commentHistory; // login -> list of comments
+
     Map<String, User> users;
 
-    public UserStorage(final String fileLogins, final String filePasswords) throws Exception {
-        this.fileLogins = fileLogins;
-        this.filePasswords = filePasswords;
-        users = new HashMap<>();
-    }
+    public UserStorage(final String userInfoDirectory) throws Exception {
+        this.userInfoDirectory = userInfoDirectory;
+        this.fileLogins = userInfoDirectory + "/logins.txt";
+        this.filePasswords = userInfoDirectory + "/passwords.txt";
+        commentHistory = new TreeMap<String, List<String>>();
+
+     }
 
 
     boolean isUserExist(String name) {
@@ -45,6 +56,7 @@ public class UserStorage {
         users.put(user.getName(), user);
         appendStringToFile(user.getName(), fileLogins);
         appendPasswordToFile(user.getHash(), filePasswords);
+        commentHistory.put(user.getName(), new LinkedList<>());
     }
 
     // Получить пользователя по имени и паролю
@@ -73,8 +85,56 @@ public class UserStorage {
                 break;
             }
         }
+
         br.close();
         fis.close();
+
+        for(String userName : users.keySet()) {
+            ArrayList<String> userComments = readCommentsHistoryFromFile(userName);
+            commentHistory.put(userName, userComments);
+        }
+
+    }
+
+    ArrayList<String> readCommentsHistoryFromFile(final String userName) {
+
+
+
+        ArrayList<String> comments = new ArrayList<>();
+
+        try {
+            BufferedReader br = new BufferedReader(new FileReader(userInfoDirectory + "/" + userName + ".txt"));
+            String currentComment;
+            while(true) {
+                currentComment = br.readLine();
+                if (currentComment == null) {
+                    break;
+                }
+               comments.add(currentComment);
+            }
+        } catch (Exception exc) {
+            return comments;
+        }
+        return comments;
+    }
+
+    public List<String> getUserCommentHistory(String userName) {
+
+        return commentHistory.get(userName);
+
+    }
+
+    public void close() throws Exception {
+
+        for(String userName : commentHistory.keySet()) {
+            List<String> comments = commentHistory.get(userName);
+            BufferedWriter bw = new BufferedWriter(new FileWriter(userInfoDirectory + "/" + userName + ".txt"));
+            for(String comment : comments) {
+                bw.write(comment + "\n");
+            }
+            bw.close();
+        }
+
     }
 
 }
