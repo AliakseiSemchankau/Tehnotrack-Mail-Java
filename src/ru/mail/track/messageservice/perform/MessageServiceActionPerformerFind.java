@@ -25,6 +25,7 @@ public class MessageServiceActionPerformerFind extends MessageServiceActionPerfo
         for(Message comment: comments) {
             try {
                 if (comment.getMessage().matches(pattern)) {
+                    System.out.println(comment.getTimeStamp());
                     System.out.println(comment.getMessage());
                 }
             } catch (java.util.regex.PatternSyntaxException psExc) {

@@ -22,6 +22,7 @@ public class UserStorage {
     private String filePasswords;
 
     private Map<String, List<Message>> commentHistory; // login -> list of comments
+    private Map<String, Integer> commentCount; // login -> count of existing comments
 
     Map<String, User> users;
 
@@ -30,9 +31,8 @@ public class UserStorage {
         this.fileLogins = userInfoDirectory + "/logins.txt";
         this.filePasswords = userInfoDirectory + "/passwords.txt";
         commentHistory = new TreeMap<String, List<Message>>();
-
-     }
-
+        commentCount = new TreeMap<>();
+    }
 
     boolean isUserExist(String name) {
         return users.containsKey(name);
@@ -40,7 +40,7 @@ public class UserStorage {
 
     private void appendStringToFile(final String info, final String fileName) throws Exception {
         RandomAccessFile raf = new RandomAccessFile(fileName, "rw");
-        raf.skipBytes((int)raf.length());
+        raf.skipBytes((int) raf.length());
         raf.writeBytes(info);
         raf.writeBytes("\n");
         raf.close();
@@ -48,7 +48,7 @@ public class UserStorage {
 
     private void appendPasswordToFile(final byte[] info, final String fileName) throws Exception {
         RandomAccessFile raf = new RandomAccessFile(fileName, "rw");
-        raf.skipBytes((int)raf.length());
+        raf.skipBytes((int) raf.length());
         raf.write(info);
         raf.close();
     }
@@ -90,9 +90,10 @@ public class UserStorage {
         br.close();
         fis.close();
 
-        for(String userName : users.keySet()) {
+        for (String userName : users.keySet()) {
             ArrayList<Message> userComments = readCommentsHistoryFromFile(userName);
             commentHistory.put(userName, userComments);
+            commentCount.put(userName, new Integer(userComments.size()));
         }
 
     }
@@ -105,13 +106,13 @@ public class UserStorage {
             BufferedReader br = new BufferedReader(new FileReader(userInfoDirectory + "/" + userName + ".txt"));
             String currentTime;
             String currentComment;
-            while(true) {
+            while (true) {
                 currentTime = br.readLine();
                 currentComment = br.readLine();
                 if (currentTime == null || currentComment == null) {
                     break;
                 }
-               comments.add(new Message(currentComment, currentTime));
+                comments.add(new Message(currentComment, currentTime));
             }
         } catch (Exception exc) {
             return comments;
@@ -127,13 +128,29 @@ public class UserStorage {
 
     public void close() throws Exception {
 
-        for(String userName : commentHistory.keySet()) {
+        for (String userName : commentHistory.keySet()) {
             List<Message> comments = commentHistory.get(userName);
-            BufferedWriter bw = new BufferedWriter(new FileWriter(userInfoDirectory + "/" + userName + ".txt"));
-            for(Message comment : comments) {
-                bw.write(comment.getTimeStamp() + "\n" + comment.getMessage() + "\n");
+            //System.out.println(commentCount.get(userName).intValue() + " = count for " + userNameq);
+            if (comments.size() == commentCount.get(userName).intValue()) {
+                continue;
             }
-            bw.close();
+            System.out.println(commentCount.get(userName).intValue() + " " + (comments.size() - 1) + " " + userName);
+            List<Message> newComments = comments.subList(commentCount.get(userName).intValue(), comments.size());
+            appendCommentsToFile(newComments, userInfoDirectory + "/" + userName + ".txt");
+        }
+
+    }
+
+    private void appendCommentsToFile(List<Message> comments, final String fileName) {
+
+
+        try (PrintWriter out = new PrintWriter(new BufferedWriter(new FileWriter(fileName, true)))) {
+            for (Message msg : comments) {
+                out.write(msg.getTimeStamp() + "\n" + msg.getMessage() + "\n");
+            }
+
+        } catch (IOException e) {
+            //exception handling left as an exercise for the reader
         }
 
     }
