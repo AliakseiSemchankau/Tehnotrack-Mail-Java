@@ -14,6 +14,7 @@ import java.io.RandomAccessFile;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by aliakseisemchankau on 22.10.15.
@@ -32,7 +33,7 @@ public class DownloadServiceFileImpl implements DownloadService{
     }
 
     @Override
-    public HashMap<String, User> downloadUsers() throws Exception{
+    public Map<String, User> downloadUsers() throws Exception{
 
         HashMap<String, User> users = new HashMap<>();
 
@@ -59,7 +60,7 @@ public class DownloadServiceFileImpl implements DownloadService{
     }
 
     @Override
-    public ArrayList<Message> readCommentsHistoryUser(String userName) {
+    public List<Message> readCommentsHistoryUser(String userName) {
 
         ArrayList<Message> comments = new ArrayList<>();
 
