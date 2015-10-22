@@ -8,7 +8,7 @@ import java.util.List;
 /**
  * Created by aliakseisemchankau on 15.10.15.
  */
-public class MessageServiceActionPerformerFind extends MessageServiceActionPerformer {
+public class MessageServiceCommandFind extends MessageServiceCommand {
     @Override
     public void perform(String[] cmd, MessageService ms) {
 

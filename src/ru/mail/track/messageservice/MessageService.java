@@ -4,11 +4,10 @@ import ru.mail.track.User;
 import ru.mail.track.UserStorage;
 import ru.mail.track.messageservice.perform.*;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
-import java.util.TreeMap;
-
 
 
 /**
@@ -16,20 +15,19 @@ import java.util.TreeMap;
  */
 public class MessageService {
 
-    List<Message> commentsHistory;
-    boolean exit = false;
-    Map<String, MessageServiceActionPerformer> commandPerformer = new TreeMap<>();
-    User user;
-
+    private List<Message> commentsHistory;
+    private boolean exit = false;
+    private Map<String, MessageServiceCommand> commandPerformer = new HashMap<>();
+    private User user;
 
     public MessageService(User user, UserStorage store) {
         this.user = user;
         commentsHistory = store.getUserCommentHistory(user.getName());
-        commandPerformer.put("\\help", new MessageServiceActionPerformerHelp());
-        commandPerformer.put("\\user", new MessageServiceActionPerformerUser());
-        commandPerformer.put("\\history", new MessageServiceActionPerformerHistory());
-        commandPerformer.put("\\find", new MessageServiceActionPerformerFind());
-        commandPerformer.put("\\exit", new MessageServiceActionPerformerExit());
+        commandPerformer.put("\\help", new MessageServiceCommandHelp());
+        commandPerformer.put("\\user", new MessageServiceCommandUser());
+        commandPerformer.put("\\history", new MessageServiceCommandHistory());
+        commandPerformer.put("\\find", new MessageServiceCommandFind());
+        commandPerformer.put("\\exit", new MessageServiceCommandExit());
     }
 
 

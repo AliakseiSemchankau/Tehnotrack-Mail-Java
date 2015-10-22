@@ -8,7 +8,7 @@ import java.util.List;
 /**
  * Created by aliakseisemchankau on 15.10.15.
  */
-public class MessageServiceActionPerformerHistory extends MessageServiceActionPerformer {
+public class MessageServiceCommandHistory extends MessageServiceCommand {
     @Override
     public void perform(String[] cmd, MessageService ms) {
 
@@ -28,7 +28,7 @@ public class MessageServiceActionPerformerHistory extends MessageServiceActionPe
 
     }
 
-    int parseToInt(String number) {
+    private int parseToInt(String number) {
 
         if (number == null || number.length() == 0) {
             return 0;

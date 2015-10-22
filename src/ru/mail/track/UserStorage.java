@@ -1,5 +1,6 @@
 package ru.mail.track;
 
+import ru.mail.track.download.DownloadService;
 import ru.mail.track.messageservice.Message;
 
 import java.io.*;
@@ -16,49 +17,32 @@ import java.util.TreeMap;
  */
 public class UserStorage {
 
-    private String userInfoDirectory;
-
-    private String fileLogins;
-    private String filePasswords;
-
     private Map<String, List<Message>> commentHistory; // login -> list of comments
     private Map<String, Integer> commentCount; // login -> count of existing comments
+    private Map<String, User> users;           // login -> corresponding User
+    private DownloadService dService;          //downloading service for saving user information
 
-    Map<String, User> users;
-
-    public UserStorage(final String userInfoDirectory) throws Exception {
+    public UserStorage(final String userInfoDirectory, DownloadService dService) throws Exception {
         this.userInfoDirectory = userInfoDirectory;
-        this.fileLogins = userInfoDirectory + "/logins.txt";
-        this.filePasswords = userInfoDirectory + "/passwords.txt";
-        commentHistory = new TreeMap<String, List<Message>>();
-        commentCount = new TreeMap<>();
+        commentHistory = new HashMap<>();
+        commentCount = new HashMap<>();
+
+        this.dService = dService;
+        dService.setUserInfoDirectory(userInfoDirectory);
     }
 
-    boolean isUserExist(String name) {
+    public boolean isUserExist(String name) {
         return users.containsKey(name);
-    }
-
-    private void appendStringToFile(final String info, final String fileName) throws Exception {
-        RandomAccessFile raf = new RandomAccessFile(fileName, "rw");
-        raf.skipBytes((int) raf.length());
-        raf.writeBytes(info);
-        raf.writeBytes("\n");
-        raf.close();
-    }
-
-    private void appendPasswordToFile(final byte[] info, final String fileName) throws Exception {
-        RandomAccessFile raf = new RandomAccessFile(fileName, "rw");
-        raf.skipBytes((int) raf.length());
-        raf.write(info);
-        raf.close();
     }
 
     // Добавить пользователя в хранилище
     void addUser(User user) throws Exception {
         users.put(user.getName(), user);
-        appendStringToFile(user.getName(), fileLogins);
-        appendPasswordToFile(user.getHash(), filePasswords);
         commentHistory.put(user.getName(), new LinkedList<>());
+        commentCount.put(user.getName(), 0);
+
+        dService.addUserName(user.getName());
+        dService.addPassword(user.getHash());
     }
 
     // Получить пользователя по имени и паролю
@@ -69,60 +53,21 @@ public class UserStorage {
         return null;
     }
 
-    public void open() throws Exception {
-
-        BufferedReader br = new BufferedReader(new FileReader(fileLogins));
-        FileInputStream fis = new FileInputStream(filePasswords);
-
-        users = new HashMap<>();
-
-        while (true) {
-            String currentUserName = br.readLine();
-            if (currentUserName != null) {
-                byte[] currentHash = new byte[32];
-                fis.read(currentHash);
-                users.put(currentUserName, new User(currentUserName, currentHash));
-            } else {
-                break;
-            }
-        }
-
-        br.close();
-        fis.close();
-
-        for (String userName : users.keySet()) {
-            ArrayList<Message> userComments = readCommentsHistoryFromFile(userName);
-            commentHistory.put(userName, userComments);
-            commentCount.put(userName, new Integer(userComments.size()));
-        }
-
-    }
-
-    ArrayList<Message> readCommentsHistoryFromFile(final String userName) {
-
-        ArrayList<Message> comments = new ArrayList<>();
-
-        try {
-            BufferedReader br = new BufferedReader(new FileReader(userInfoDirectory + "/" + userName + ".txt"));
-            String currentTime;
-            String currentComment;
-            while (true) {
-                currentTime = br.readLine();
-                currentComment = br.readLine();
-                if (currentTime == null || currentComment == null) {
-                    break;
-                }
-                comments.add(new Message(currentComment, currentTime));
-            }
-        } catch (Exception exc) {
-            return comments;
-        }
-        return comments;
-    }
-
     public List<Message> getUserCommentHistory(String userName) {
 
         return commentHistory.get(userName);
+
+    }
+
+    public void open() throws Exception {
+
+        users = dService.downloadUsers();
+
+        for (String userName : users.keySet()) {
+            ArrayList<Message> userComments = dService.readCommentsHistoryUser(userName);
+            commentHistory.put(userName, userComments);
+            commentCount.put(userName, new Integer(userComments.size()));
+        }
 
     }
 
@@ -130,29 +75,17 @@ public class UserStorage {
 
         for (String userName : commentHistory.keySet()) {
             List<Message> comments = commentHistory.get(userName);
-            //System.out.println(commentCount.get(userName).intValue() + " = count for " + userNameq);
-            if (comments.size() == commentCount.get(userName).intValue()) {
+
+            if (comments.size() == commentCount.get(userName).intValue()) {  // if user didn't add any comment, we don't change anything
                 continue;
             }
-            System.out.println(commentCount.get(userName).intValue() + " " + (comments.size() - 1) + " " + userName);
-            List<Message> newComments = comments.subList(commentCount.get(userName).intValue(), comments.size());
-            appendCommentsToFile(newComments, userInfoDirectory + "/" + userName + ".txt");
+
+            List<Message> newComments = comments.subList(commentCount.get(userName).intValue(), comments.size()); //comments to update
+
+            dService.appendCommentsForUser(newComments, userName);
         }
 
     }
 
-    private void appendCommentsToFile(List<Message> comments, final String fileName) {
-
-
-        try (PrintWriter out = new PrintWriter(new BufferedWriter(new FileWriter(fileName, true)))) {
-            for (Message msg : comments) {
-                out.write(msg.getTimeStamp() + "\n" + msg.getMessage() + "\n");
-            }
-
-        } catch (IOException e) {
-            //exception handling left as an exercise for the reader
-        }
-
-    }
 
 }
