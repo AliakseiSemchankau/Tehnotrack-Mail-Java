@@ -13,7 +13,7 @@ import java.util.Map;
  */
 public interface DownloadService {
 
-    public void setUserInfoDirectory (String userInfoDirectory);
+    public void init();
 
     public Map<String, User> downloadUsers() throws Exception;
 

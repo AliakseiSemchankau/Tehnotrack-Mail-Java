@@ -21,6 +21,7 @@ public class UserStorage {
     private Map<String, Integer> commentCount; // login -> count of existing comments
     private Map<String, User> users;           // login -> corresponding User
     private DownloadService dService;          //downloading service for saving user information
+    private String userInfoDirectory;
 
     public UserStorage(final String userInfoDirectory, DownloadService dService) throws Exception {
         this.userInfoDirectory = userInfoDirectory;
@@ -28,7 +29,7 @@ public class UserStorage {
         commentCount = new HashMap<>();
 
         this.dService = dService;
-        dService.setUserInfoDirectory(userInfoDirectory);
+        dService.init();
     }
 
     public boolean isUserExist(String name) {
@@ -64,7 +65,7 @@ public class UserStorage {
         users = dService.downloadUsers();
 
         for (String userName : users.keySet()) {
-            ArrayList<Message> userComments = dService.readCommentsHistoryUser(userName);
+            List<Message> userComments = dService.readCommentsHistoryUser(userName);
             commentHistory.put(userName, userComments);
             commentCount.put(userName, new Integer(userComments.size()));
         }

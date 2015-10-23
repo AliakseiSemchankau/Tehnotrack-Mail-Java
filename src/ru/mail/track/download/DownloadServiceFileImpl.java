@@ -25,9 +25,10 @@ public class DownloadServiceFileImpl implements DownloadService{
     private String fileLogins;
     private String filePasswords;
 
+
     @Override
-    public void setUserInfoDirectory(String userInfoDirectory) {
-        this.userInfoDirectory = userInfoDirectory;
+    public void init() {
+        this.userInfoDirectory = "userinfo";
         fileLogins = userInfoDirectory + "/logins.txt";
         filePasswords = userInfoDirectory + "/passwords.txt";
     }
