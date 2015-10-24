@@ -1,50 +1,49 @@
 package ru.mail.track;
 
+import ru.mail.track.download.DownloadService;
+import ru.mail.track.messageservice.Message;
+
 import java.io.*;
+import java.lang.reflect.Array;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 
 /**
  * Created by aliakseisemchankau on 29.9.15.
  */
 public class UserStorage {
 
-    private String fileLogins;
-    private String filePasswords;
+    private Map<String, List<Message>> commentHistory; // login -> list of comments
+    private Map<String, Integer> commentCount; // login -> count of existing comments
+    private Map<String, User> users;           // login -> corresponding User
+    private DownloadService dService;          //downloading service for saving user information
+    private String userInfoDirectory;
 
-    Map<String, User> users;
+    public UserStorage(final String userInfoDirectory, DownloadService dService) throws Exception {
+        this.userInfoDirectory = userInfoDirectory;
+        commentHistory = new HashMap<>();
+        commentCount = new HashMap<>();
 
-    public UserStorage(final String fileLogins, final String filePasswords) throws Exception {
-        this.fileLogins = fileLogins;
-        this.filePasswords = filePasswords;
-        users = new HashMap<>();
+        this.dService = dService;
+        dService.init();
     }
 
-
-    boolean isUserExist(String name) {
+    public boolean isUserExist(String name) {
         return users.containsKey(name);
-    }
-
-    private void appendStringToFile(final String info, final String fileName) throws Exception {
-        RandomAccessFile raf = new RandomAccessFile(fileName, "rw");
-        raf.skipBytes((int)raf.length());
-        raf.writeBytes(info);
-        raf.writeBytes("\n");
-        raf.close();
-    }
-
-    private void appendPasswordToFile(final byte[] info, final String fileName) throws Exception {
-        RandomAccessFile raf = new RandomAccessFile(fileName, "rw");
-        raf.skipBytes((int)raf.length());
-        raf.write(info);
-        raf.close();
     }
 
     // Добавить пользователя в хранилище
     void addUser(User user) throws Exception {
         users.put(user.getName(), user);
-        appendStringToFile(user.getName(), fileLogins);
-        appendPasswordToFile(user.getHash(), filePasswords);
+        commentHistory.put(user.getName(), new LinkedList<>());
+        commentCount.put(user.getName(), 0);
+
+        dService.addUserName(user.getName());
+        dService.addPassword(user.getHash());
     }
 
     // Получить пользователя по имени и паролю
@@ -55,26 +54,39 @@ public class UserStorage {
         return null;
     }
 
+    public List<Message> getUserCommentHistory(String userName) {
+
+        return commentHistory.get(userName);
+
+    }
+
     public void open() throws Exception {
 
-        BufferedReader br = new BufferedReader(new FileReader(fileLogins));
-        FileInputStream fis = new FileInputStream(filePasswords);
+        users = dService.downloadUsers();
 
-        users = new HashMap<>();
-
-        while (true) {
-            String currentUserName = br.readLine();
-
-            if (currentUserName != null) {
-                byte[] currentHash = new byte[32];
-                fis.read(currentHash);
-                users.put(currentUserName, new User(currentUserName, currentHash));
-            } else {
-                break;
-            }
+        for (String userName : users.keySet()) {
+            List<Message> userComments = dService.readCommentsHistoryUser(userName);
+            commentHistory.put(userName, userComments);
+            commentCount.put(userName, new Integer(userComments.size()));
         }
-        br.close();
-        fis.close();
+
     }
+
+    public void close() throws Exception {
+
+        for (String userName : commentHistory.keySet()) {
+            List<Message> comments = commentHistory.get(userName);
+
+            if (comments.size() == commentCount.get(userName).intValue()) {  // if user didn't add any comment, we don't change anything
+                continue;
+            }
+
+            List<Message> newComments = comments.subList(commentCount.get(userName).intValue(), comments.size()); //comments to update
+
+            dService.appendCommentsForUser(newComments, userName);
+        }
+
+    }
+
 
 }
