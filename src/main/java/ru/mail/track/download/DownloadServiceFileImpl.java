@@ -1,7 +1,7 @@
 package ru.mail.track.download;
 
-import ru.mail.track.User;
-import ru.mail.track.messageservice.Message;
+import ru.mail.track.message.User;
+import ru.mail.track.message.Message;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -34,9 +34,9 @@ public class DownloadServiceFileImpl implements DownloadService{
     }
 
     @Override
-    public Map<String, User> downloadUsers() throws Exception{
+    public Map<Long, User> downloadUsers() throws Exception{
 
-        HashMap<String, User> users = new HashMap<>();
+        HashMap<Long, User> users = new HashMap<>();
 
         try (BufferedReader br = new BufferedReader(new FileReader(fileLogins));
              FileInputStream fis = new FileInputStream(filePasswords)) {
@@ -46,7 +46,8 @@ public class DownloadServiceFileImpl implements DownloadService{
                 if (currentUserName != null) {
                     byte[] currentHash = new byte[32];
                     fis.read(currentHash);
-                    users.put(currentUserName, new User(currentUserName, currentHash));
+                    Long id = new Long(br.read());
+                    users.put(id, new User(currentUserName, currentHash, id));
                 } else {
                     break;
                 }

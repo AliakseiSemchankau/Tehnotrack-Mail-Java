@@ -1,7 +1,7 @@
-package ru.mail.track;
+package ru.mail.track.message;
 
-import ru.mail.track.messageservice.MessageService;
-
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.security.MessageDigest;
 import java.util.Arrays;
 import java.util.Scanner;
@@ -18,17 +18,20 @@ public class AuthorizationService {
 
     User user = null;
 
-    public static byte[] calcHash(final String str) throws Exception {
+    public static byte[] calcHash(final String str) {
 
-        if (md == null) {
-            md = MessageDigest.getInstance("SHA-256");
+        try {
+            if (md == null) {
+                md = MessageDigest.getInstance("SHA-256");
+            }
+            md.update(str.getBytes("UTF-8"));
+        } catch (Exception exc) {
+            System.err.println("can't get instance of hashing algo SHA-256");
         }
-        md.update(str.getBytes("UTF-8"));
-
         return md.digest();
     }
 
-    public static boolean isCorrect(User user, String word) throws Exception {
+    public static boolean isCorrect(User user, String word) {
 
         if (word == null) {
             return false;
@@ -40,7 +43,7 @@ public class AuthorizationService {
         return Arrays.equals(hash, newHash);
     }
 
-    public AuthorizationService(UserStorage store) {
+    public AuthorizationService(UserStorage store, InputStream is, OutputStream os) {
         this.store = store;
     }
 
@@ -143,7 +146,7 @@ public class AuthorizationService {
         }
     }
 
-    boolean getSuccess() {
+    public boolean getSuccess() {
         return success;
     }
 

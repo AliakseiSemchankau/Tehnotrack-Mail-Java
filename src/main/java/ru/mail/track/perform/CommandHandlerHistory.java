@@ -1,16 +1,21 @@
-package ru.mail.track.messageservice.perform;
+package ru.mail.track.perform;
 
-import ru.mail.track.messageservice.Message;
-import ru.mail.track.messageservice.MessageService;
+import ru.mail.track.message.Message;
+import ru.mail.track.message.MessageStore;
+import ru.mail.track.message.MessageWorker;
+import ru.mail.track.message.Result;
+import ru.mail.track.message.User;
+import ru.mail.track.message.UserStorage;
+import ru.mail.track.session.Session;
 
 import java.util.List;
 
 /**
  * Created by aliakseisemchankau on 15.10.15.
  */
-public class MessageServiceCommandHistory extends MessageServiceCommand {
+public class CommandHandlerHistory implements CommandHandler {
     @Override
-    public void perform(String[] cmd, MessageService ms) {
+    public Result perform(String[] cmd, Session session, UserStorage userStorage, MessageStore messageStore) {
 
         List<Message> commentsHistory = ms.getCommentsHistory();
 

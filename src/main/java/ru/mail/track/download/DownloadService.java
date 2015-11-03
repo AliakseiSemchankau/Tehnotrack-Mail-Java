@@ -1,10 +1,8 @@
 package ru.mail.track.download;
 
-import ru.mail.track.User;
-import ru.mail.track.messageservice.Message;
+import ru.mail.track.message.User;
+import ru.mail.track.message.Message;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -15,7 +13,7 @@ public interface DownloadService {
 
     public void init();
 
-    public Map<String, User> downloadUsers() throws Exception;
+    public Map<Long, User> downloadUsers() throws Exception;
 
     public List<Message> readCommentsHistoryUser(String userName);
 
