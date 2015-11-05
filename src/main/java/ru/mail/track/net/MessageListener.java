@@ -1,6 +1,6 @@
 package ru.mail.track.net;
 
-import ru.mail.track.message.Message;
+import ru.mail.track.message.messagetypes.Message;
 
 /**
  * Слушает сообщения

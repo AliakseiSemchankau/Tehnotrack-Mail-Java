@@ -1,7 +1,7 @@
 package ru.mail.track.download;
 
 import ru.mail.track.message.User;
-import ru.mail.track.message.Message;
+import ru.mail.track.message.messagetypes.Message;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -19,12 +19,15 @@ import java.util.Map;
 /**
  * Created by aliakseisemchankau on 22.10.15.
  */
-public class DownloadServiceFileImpl implements DownloadService{
+public class DownloadServiceFileImpl implements DownloadService {
 
     private String userInfoDirectory;
     private String fileLogins;
     private String filePasswords;
 
+    public DownloadServiceFileImpl() {
+        init();
+    }
 
     @Override
     public void init() {
@@ -34,7 +37,7 @@ public class DownloadServiceFileImpl implements DownloadService{
     }
 
     @Override
-    public Map<Long, User> downloadUsers() throws Exception{
+    public Map<Long, User> downloadUsers() throws Exception {
 
         HashMap<Long, User> users = new HashMap<>();
 
@@ -46,8 +49,13 @@ public class DownloadServiceFileImpl implements DownloadService{
                 if (currentUserName != null) {
                     byte[] currentHash = new byte[32];
                     fis.read(currentHash);
-                    Long id = new Long(br.read());
-                    users.put(id, new User(currentUserName, currentHash, id));
+                    String i = br.readLine();
+                    System.out.println("i =" + i);
+                    Long id = Long.valueOf(i);
+                    System.out.println(currentUserName + ", id = " + id.toString());
+                    User user = new User(currentUserName, currentHash);
+                    user.setUserID(id);
+                    users.put(id, user);
                 } else {
                     break;
                 }
@@ -59,6 +67,13 @@ public class DownloadServiceFileImpl implements DownloadService{
 
         return users;
 
+    }
+
+    @Override
+    public void addUser(String userName, byte[] password, Long userId) throws Exception {
+        appendStringToFile(userName, fileLogins);
+        appendStringToFile(userId.toString(), fileLogins);
+        appendPasswordToFile(password, filePasswords);
     }
 
     @Override
@@ -76,7 +91,7 @@ public class DownloadServiceFileImpl implements DownloadService{
                 if (currentTime == null || currentComment == null) {
                     break;
                 }
-                comments.add(new Message(currentComment, currentTime));
+                //comments.add(new Message(currentComment, currentTime));
             }
         } catch (Exception exc) {
             return comments;
@@ -84,14 +99,15 @@ public class DownloadServiceFileImpl implements DownloadService{
         return comments;
     }
 
+
     @Override
-    public void addUserName(String userName) throws Exception{
+    public void addUserName(String userName) throws Exception {
         appendStringToFile(userName, fileLogins);
 
     }
 
     @Override
-    public void addPassword(byte[] password) throws Exception{
+    public void addPassword(byte[] password) throws Exception {
         appendPasswordToFile(password, filePasswords);
     }
 

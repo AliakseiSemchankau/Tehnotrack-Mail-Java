@@ -31,4 +31,6 @@ public interface IUserStore {
      */
     void initialize(DownloadService dService) throws Exception;
 
+    boolean isUserExist(String login);
+
 }

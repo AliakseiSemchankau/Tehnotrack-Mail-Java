@@ -1,7 +1,9 @@
 package ru.mail.track;
 
 import ru.mail.track.download.DownloadServiceFileImpl;
-import ru.mail.track.message.MessageWorker;
+import ru.mail.track.message.CommandHandler;
+import ru.mail.track.message.MessageStore;
+import ru.mail.track.message.MessageStoreStub;
 import ru.mail.track.message.UserStorage;
 import ru.mail.track.net.ThreadedServer;
 
@@ -11,11 +13,12 @@ import ru.mail.track.net.ThreadedServer;
 public class Main {
 
     public static void main(String[] args) throws Exception {
-        UserStorage store = new UserStorage("userinfo", new DownloadServiceFileImpl());
+        UserStorage store = new UserStorage();
         store.initialize(new DownloadServiceFileImpl());
-        //MessageStore messageStore = new Messag
 
-        ThreadedServer server = new ThreadedServer(store,);
+        MessageStore messageStore = new MessageStoreStub();
+
+        ThreadedServer server = new ThreadedServer(store, new CommandHandler(store, messageStore));
         server.startServer();
 
 

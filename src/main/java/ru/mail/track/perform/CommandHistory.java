@@ -1,23 +1,19 @@
 package ru.mail.track.perform;
 
-import ru.mail.track.message.Message;
+import ru.mail.track.message.messagetypes.Message;
 import ru.mail.track.message.MessageStore;
-import ru.mail.track.message.MessageWorker;
 import ru.mail.track.message.Result;
-import ru.mail.track.message.User;
 import ru.mail.track.message.UserStorage;
 import ru.mail.track.session.Session;
-
-import java.util.List;
 
 /**
  * Created by aliakseisemchankau on 15.10.15.
  */
-public class CommandHandlerHistory implements CommandHandler {
+public class CommandHistory implements Command {
     @Override
-    public Result perform(String[] cmd, Session session, UserStorage userStorage, MessageStore messageStore) {
+    public Result perform(Message msg, Session session, UserStorage userStorage, MessageStore messageStore) {
 
-        List<Message> commentsHistory = ms.getCommentsHistory();
+        /*List<Message> commentsHistory = ms.getCommentsHistory();
 
         int countOfComments = commentsHistory.size();
 
@@ -29,7 +25,8 @@ public class CommandHandlerHistory implements CommandHandler {
 
         for(int i = Math.max(commentsHistory.size() - countOfComments, 0); i < commentsHistory.size(); ++i) {
             System.out.println(commentsHistory.get(i).getTimeStamp() + "\n" + commentsHistory.get(i).getMessage());
-        }
+        }*/
+        return null;
 
     }
 

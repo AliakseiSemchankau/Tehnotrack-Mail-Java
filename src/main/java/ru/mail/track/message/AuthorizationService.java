@@ -58,7 +58,7 @@ public class AuthorizationService {
         }
         return result;
     }
-
+/*
     private String readString(final String message) {
         String result = null;
         while (result == null || result.length() == 0) {
@@ -96,8 +96,8 @@ public class AuthorizationService {
             System.out.println("there is no such option: " + wish);
         }
 
-    }
-
+    }*/
+/*
     public User authorize() throws Exception {
         String userName = readString("enter your username");
         String password = readPassword("enter your password");
@@ -153,5 +153,5 @@ public class AuthorizationService {
     public User getUser() {
         return user;
     }
-
+*/
 }

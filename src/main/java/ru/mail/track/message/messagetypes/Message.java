@@ -1,4 +1,6 @@
-package ru.mail.track.message;
+package ru.mail.track.message.messagetypes;
+
+import ru.mail.track.perform.CommandType;
 
 import java.util.Date;
 
@@ -9,17 +11,12 @@ public class Message {
 
     private String message;
     private String timeStamp;
-    private Long id;
+    private Long messageId;
     private Long sender;
+    private CommandType type;
 
-    public Message (final String msg) {
-        message = msg;
+    public Message(){
         timeStamp = new Date().toString();
-    }
-
-    public Message (final String msg, final String time) {
-        message = msg;
-        timeStamp = time;
     }
 
     public String getMessage() {
@@ -32,12 +29,16 @@ public class Message {
 
     @Override
     public String toString() {
-        return ("message: " + message + "; timestamp: " + timeStamp + "; " +
-                "id: " + id + "; sender: " + sender );
+        return "Message{" +
+                ", message=" + message +
+                ", id=" + messageId +
+                ", sender=" + sender +
+                ", type=" + type +
+                '}';
     }
 
-    public Long getId() {
-        return id;
+    public Long getMessageId() {
+        return messageId;
     }
 
     public Long getSender() {
@@ -52,11 +53,19 @@ public class Message {
         this.timeStamp = timeStamp;
     }
 
-    public void setId(Long id) {
-        this.id = id;
+    public void setMessageId(Long messageId) {
+        this.messageId = messageId;
     }
 
     public void setSender(Long sender) {
         this.sender = sender;
+    }
+
+    public CommandType getType() {
+        return type;
+    }
+
+    public void setType(CommandType type) {
+        this.type = type;
     }
 }

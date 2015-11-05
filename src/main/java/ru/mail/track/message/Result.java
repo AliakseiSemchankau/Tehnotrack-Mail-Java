@@ -7,6 +7,16 @@ public class Result {
 
     private boolean status = true;
     private String errorMsg = "";
+    private String textMSG = "";
+
+    public void setTextMSG(String textMSG) {
+        this.textMSG = textMSG;
+    }
+
+    public String getTextMSG() {
+
+        return textMSG;
+    }
 
     public void setStatus(boolean status) {
         this.status = status;
@@ -26,8 +36,14 @@ public class Result {
 
     @Override
     public String toString() {
-        return "status: " + status + "\n" +
-                "errorMsg: " + errorMsg + "\n";
+        return "{ status: " + status + ", " +
+                "errorMsg: " + errorMsg + ", " +
+                "textMsg: " + textMSG + " }";
+    }
+
+    public Result(final boolean status, final String errorMsg) {
+        this.status = status;
+        this.errorMsg = errorMsg;
     }
 
 }

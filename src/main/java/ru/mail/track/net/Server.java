@@ -1,7 +1,7 @@
 package ru.mail.track.net;
 
 import ru.mail.track.message.AuthorizationService;
-import ru.mail.track.message.MessageWorker;
+import ru.mail.track.message.CommandHandler;
 import ru.mail.track.message.User;
 import ru.mail.track.message.UserStorage;
 
@@ -16,7 +16,7 @@ import java.net.Socket;
  */
 public class Server {
 
-    public final int PORT = 19000;
+  /*  public final int PORT = 19000;
     public UserStorage store;
 
     public Server(UserStorage store) {
@@ -65,7 +65,7 @@ public class Server {
 
                 if (authService.getSuccess()) {
                     User user = authService.getUser();
-                    MessageWorker ms = new MessageWorker(user, store);
+                    CommandHandler ms = new CommandHandler(user, store);
                     ms.start();
                 }
 
@@ -84,7 +84,7 @@ public class Server {
                         //TODO: use here commandHandler instance to process input
                         // invoke commandHandler.perform()
 
-                        // code below must be encapsulated in busines login (CommandHandler implementatino)
+                        // code below must be encapsulated in busines login (Command implementatino)
                         // 1 /login -> User
                         // 2 /message -> MeesageHandler.perform() :
                         // message {text, chatId,...}
@@ -106,7 +106,7 @@ public class Server {
                 System.err.println(exc.getMessage());
             }
         }
-    }
+    }*/
 }
 
 

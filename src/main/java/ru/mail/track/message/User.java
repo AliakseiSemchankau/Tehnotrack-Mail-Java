@@ -10,16 +10,14 @@ public class User {
 
     private Long userID;
 
-    public User(final String userName, final String password, final Long userID) throws Exception{
+    public User(final String userName, final String password) {
         this.userName = userName;
         hash = AuthorizationService.calcHash(password);
-        this.userID = userID;
     }
 
-    public User(final String userName, final byte[] hash, final Long userID) throws Exception {
+    public User(final String userName, final byte[] hash) {
         this.userName = userName;
         this.hash = hash;
-        this.userID = userID;
     }
 
     public String getName() {
@@ -32,6 +30,10 @@ public class User {
 
     public Long getUserID() {
         return userID;
+    }
+
+    public void setUserID(Long id) {
+        userID = id;
     }
 
 

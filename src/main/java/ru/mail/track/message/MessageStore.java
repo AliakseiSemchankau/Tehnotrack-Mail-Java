@@ -1,5 +1,7 @@
 package ru.mail.track.message;
 
+import ru.mail.track.message.messagetypes.Message;
+
 import java.util.List;
 
 /**

@@ -6,14 +6,16 @@ import java.net.Socket;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
-import java.util.concurrent.atomic.AtomicLong;
 
 ///////////import org.slf4j.Logger;
 ///////////import org.slf4j.LoggerFactory;
 
-import ru.mail.track.message.Message;
-import ru.mail.track.message.MessageWorker;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import ru.mail.track.message.messagetypes.Message;
+import ru.mail.track.message.CommandHandler;
 import ru.mail.track.message.Result;
+import ru.mail.track.message.messagetypes.SimpleMessage;
 import ru.mail.track.message.User;
 import ru.mail.track.message.UserStorage;
 import ru.mail.track.session.Session;
@@ -30,13 +32,14 @@ public class ThreadedServer implements MessageListener {
     private Map<Long, ConnectionHandler> handlers = new HashMap<>();
     private ServerSocket sSocket;
     private UserStorage store;
-    private MessageWorker messageWorker;
+    private CommandHandler commandHandler;
     private Map<Long, User> userMap = new TreeMap<>();
     private SessionManager sessionManager = new SessionManager();
+    static Logger log = LoggerFactory.getLogger(ThreadedServer.class);
 
-    public ThreadedServer(UserStorage store, MessageWorker messageWorker) {
+    public ThreadedServer(UserStorage store, CommandHandler commandHandler) {
         this.store = store;
-        this.messageWorker = messageWorker;
+        this.commandHandler = commandHandler;
 
         try {
             sSocket = new ServerSocket(PORT);
@@ -60,6 +63,8 @@ public class ThreadedServer implements MessageListener {
             handler.addListener(this);
 
             Session session = sessionManager.createSession();
+            session.setSessionManager(sessionManager);
+            session.setConnectionHandler(handler);
             handlers.put(session.getId(), handler);
             handler.setID(session.getId());
             Thread thread = new Thread(handler);
@@ -77,11 +82,16 @@ public class ThreadedServer implements MessageListener {
     @Override
     public void onMessage(Message message, long id) {
 
-        /////////////log.info("onMessage: {}", message);
-        System.out.println(message);
+        log.info("THREADED SERVER:onMessage: {}", message);
 
-        Result result = messageWorker.work(message, sessionManager.getSession(id));
-
+        Result result = commandHandler.work(message, sessionManager.getSession(id));
+        log.info("THREADED SERVER:onMessage, result: {}", result.toString());
+        try {
+            sessionManager.getSession(id).send(new SimpleMessage(result.toString()));
+        } catch (Exception exc) {
+            exc.printStackTrace();
+            System.err.println("some troubles while sending message to session " + id);
+        }
     }
 
 

@@ -1,7 +1,7 @@
 package ru.mail.track.message;
 
-import java.util.ArrayList;
-import java.util.Arrays;
+import ru.mail.track.message.messagetypes.Message;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -40,9 +40,9 @@ public class MessageStoreStub implements MessageStore {
 
     @Override
     public void addMessage(Long chatId, Message message) {
-        message.setId(counter.getAndIncrement());
-        chats.get(chatId).addMessage(message.getId());
-        messages.put(message.getId(), message);
+        message.setMessageId(counter.getAndIncrement());
+        chats.get(chatId).addMessage(message.getMessageId());
+        messages.put(message.getMessageId(), message);
     }
 
     @Override

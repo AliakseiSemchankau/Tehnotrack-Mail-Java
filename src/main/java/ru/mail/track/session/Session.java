@@ -1,5 +1,6 @@
 package ru.mail.track.session;
 
+import ru.mail.track.message.messagetypes.Message;
 import ru.mail.track.message.User;
 import ru.mail.track.net.ConnectionHandler;
 import ru.mail.track.net.SessionManager;
@@ -49,6 +50,12 @@ public class Session {
 
     public void setSessionManager(SessionManager sessionManager) {
         this.sessionManager = sessionManager;
+    }
+
+    public void send(Message msg) throws Exception{
+
+        connectionHandler.send(msg);
+
     }
 
 }

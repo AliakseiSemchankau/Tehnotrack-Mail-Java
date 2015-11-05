@@ -11,7 +11,9 @@ import java.util.List;
 ////////import org.slf4j.Logger;
 ////////import org.slf4j.LoggerFactory;
 
-import ru.mail.track.message.Message;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import ru.mail.track.message.messagetypes.Message;
 
 /**
  * Класс работающий с сокетом, умеет отправлять данные в сокет
@@ -19,14 +21,14 @@ import ru.mail.track.message.Message;
  */
 public class SocketConnectionHandler implements ConnectionHandler {
 
-    //////////////////////static Logger log = LoggerFactory.getLogger(SocketConnectionHandler.class);
+    static Logger log = LoggerFactory.getLogger(SocketConnectionHandler.class);
 
     // подписчики
     private List<MessageListener> listeners = new ArrayList<>();
     private Socket socket;
     private InputStream in;
     private OutputStream out;
-
+    private Protocol protocol = new StringProtocol();
     private long uniqueID;
 
     public SocketConnectionHandler(Socket socket) throws IOException {
@@ -37,14 +39,12 @@ public class SocketConnectionHandler implements ConnectionHandler {
 
     @Override
     public void send(Message msg) throws IOException {
-        //////////////if (log.isDebugEnabled()) {
-        //////////////////    log.debug(msg.toString());
-        //System.out.println(msg.toString());
-        /////////////////}
+
+        log.info("SOCKET CONNECTION HANDLER SEND: {}", msg);
 
         // TODO: здесь должен быть встроен алгоритм кодирования/декодирования сообщений
         // то есть требуется описать протокол
-        out.write(Protocol.encode(msg));
+        out.write(protocol.encode(msg));
         out.flush();
     }
 
@@ -67,10 +67,9 @@ public class SocketConnectionHandler implements ConnectionHandler {
             try {
                 int read = in.read(buf);
                 if (read > 0) {
-                    Message msg = Protocol.decode(Arrays.copyOf(buf, read));
+                    Message msg = protocol.decode(Arrays.copyOf(buf, read));
 
-                    ////////////////log.info("message received: {}", msg);
-                    System.out.println("received: " + msg);
+                    log.info("SOCKET CONNECTION HANDLER: message received: {}", msg);
 
                     // Уведомим всех подписчиков этого события
                     notifyListeners(msg);
