@@ -151,7 +151,8 @@ public class ThreadedClient implements MessageListener {
         if ("\\chat_find".equals(cmdType)) {
             ChatFindMessage chatFindMessage = new ChatFindMessage();
             chatFindMessage.setType(CommandType.CHAT_FIND);
-            chatFindMessage.setPattern(tokens[1]);
+            chatFindMessage.setChatId(Long.valueOf(tokens[1]));
+            chatFindMessage.setPattern(tokens[2]);
             handler.send(chatFindMessage);
             return;
         }

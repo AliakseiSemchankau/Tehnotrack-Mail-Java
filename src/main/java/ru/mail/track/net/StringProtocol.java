@@ -91,6 +91,12 @@ public class StringProtocol implements Protocol {
                 if (chatHistoryMessage.isHasArg()) {
                     chatHistoryMessage.setCountOfMessages(Long.valueOf(tokens[3]));
                 }
+                return chatHistoryMessage;
+            case CHAT_FIND:
+                ChatFindMessage chatFindMessage = new ChatFindMessage();
+                chatFindMessage.setChatId(Long.valueOf(tokens[1]));
+                chatFindMessage.setPattern(tokens[2]);
+               return chatFindMessage;
             default:
                 throw new RuntimeException("Invalid type: " + type);
         }
@@ -148,6 +154,7 @@ public class StringProtocol implements Protocol {
                 break;
             case CHAT_FIND:
                 ChatFindMessage chatFindMessage = (ChatFindMessage) msg;
+                builder.append(chatFindMessage.getChatId().toString()).append(DELIMITER);
                 builder.append(chatFindMessage.getPattern()).append(DELIMITER);
                 break;
             case CHAT_HISTORY:

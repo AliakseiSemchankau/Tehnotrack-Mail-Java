@@ -26,7 +26,7 @@ public class CommandChatHistory implements Command {
             return new Result(false, "you weren't authorized");
         }
 
-        if (!messageStore.getChatById().getParticipantIds().contains(user.getUserID())) {
+        if (!messageStore.getChatById(chatId).getParticipantIds().contains(user.getUserID())) {
             return new Result(false, "user with id=" + user.getUserID() + " wasn't invited to chat with id=" + chatId);
         }
 
@@ -44,7 +44,7 @@ public class CommandChatHistory implements Command {
         StringBuilder textMsg = new StringBuilder();
 
         for (long i = commentsHistory.size() - countOfComments; i < commentsHistory.size(); ++i) {
-            textMsg.append(messageStore.getMessageById(commentsHistory.get(i)).toString() + "\n");
+            textMsg.append(messageStore.getMessageById(commentsHistory.get((int)i)).toString() + "\n");
         }
 
         result.setTextMSG(textMsg.toString());
