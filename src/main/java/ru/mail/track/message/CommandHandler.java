@@ -27,10 +27,16 @@ public class CommandHandler {
         //TODO add command LOGIN <user> <pass>
         commandPerformer.put(CommandType.USER_LOGIN, new CommandLogin());
         commandPerformer.put(CommandType.USER_HELP, new CommandHelp());
-        commandPerformer.put(CommandType.USER_HISTORY, new CommandHistory());
-        commandPerformer.put(CommandType.USER_FIND, new CommandFind());
+        commandPerformer.put(CommandType.CHAT_HISTORY, new CommandChatHistory());
+        commandPerformer.put(CommandType.CHAT_FIND, new CommandChatFind());
         commandPerformer.put(CommandType.USER_REGISTER, new CommandRegister());
         commandPerformer.put(CommandType.USER_INFO, new CommandInfo());
+        commandPerformer.put(CommandType.USER_PASS, new CommandPass());
+        commandPerformer.put(CommandType.CHAT_LIST, new CommandChatList());
+        commandPerformer.put(CommandType.CHAT_CREATE, new CommandChatCreate());
+        commandPerformer.put(CommandType.CHAT_FIND, new CommandChatFind());
+        commandPerformer.put(CommandType.CHAT_SEND, new CommandChatSend());
+        commandPerformer.put(CommandType.CHAT_HISTORY, new CommandChatHistory());
     }
 
 

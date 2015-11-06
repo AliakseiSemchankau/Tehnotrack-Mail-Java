@@ -23,6 +23,11 @@ public class CommandInfo implements Command {
         }
 
         User user = userStorage.getUserById(infoMessage.getUserId());
+
+        if (user == null) {
+            return new Result(false, "user with id=" + infoMessage.getUserId() + " does not exist");
+        }
+
         Result result = new Result(true, "");
         result.setTextMSG("Info about user with id=" + user.getUserID() + ", login=" + user.getName());
         return result;

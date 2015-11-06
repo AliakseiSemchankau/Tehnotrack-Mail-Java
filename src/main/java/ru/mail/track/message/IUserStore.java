@@ -1,6 +1,6 @@
 package ru.mail.track.message;
 
-import ru.mail.track.download.DownloadService;
+import ru.mail.track.data.DataService;
 
 /**
  * Хранилище информации о пользователе
@@ -29,7 +29,7 @@ public interface IUserStore {
      *
      * It sets loader and loads a list of users
      */
-    void initialize(DownloadService dService) throws Exception;
+    void initialize(DataService dService) throws Exception;
 
     boolean isUserExist(String login);
 

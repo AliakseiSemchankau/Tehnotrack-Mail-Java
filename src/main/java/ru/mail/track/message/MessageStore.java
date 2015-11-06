@@ -10,7 +10,13 @@ import java.util.List;
 public interface MessageStore {
 
     /**
-     получаем список ид пользователей заданного чата
+     *
+     Получить список id пользователей данного чата
+     */
+    List<Long> getUsersByChatId(Long chatId);
+
+    /**
+     получаем список чатов данного юзера
      */
     List<Long> getChatsByUserId(Long userId);
 
@@ -40,5 +46,6 @@ public interface MessageStore {
      */
     void addUserToChat(Long userId, Long chatId);
 
+    Chat createChat(List<Long> userIds);
 
 }

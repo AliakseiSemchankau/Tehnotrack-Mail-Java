@@ -1,18 +1,24 @@
 package ru.mail.track.net;
 
+import com.sun.org.apache.xpath.internal.operations.Bool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import ru.mail.track.message.messagetypes.ChatCreateMessage;
+import ru.mail.track.message.messagetypes.ChatFindMessage;
+import ru.mail.track.message.messagetypes.ChatHistoryMessage;
+import ru.mail.track.message.messagetypes.ChatListMessage;
 import ru.mail.track.message.messagetypes.HelpMessage;
 import ru.mail.track.message.messagetypes.InfoMessage;
+import ru.mail.track.message.messagetypes.PassMessage;
 import ru.mail.track.message.messagetypes.RegisterMessage;
 import ru.mail.track.message.messagetypes.SimpleMessage;
 import ru.mail.track.perform.CommandType;
 import ru.mail.track.message.messagetypes.LoginMessage;
 import ru.mail.track.message.messagetypes.Message;
-import ru.mail.track.message.messagetypes.SendMessage;
+import ru.mail.track.message.messagetypes.ChatSendMessage;
 
-import javax.sound.midi.MidiDevice;
+import java.util.List;
 
 /**
  *
@@ -36,11 +42,15 @@ public class StringProtocol implements Protocol {
                 loginMessage.setLogin(tokens[1]);
                 loginMessage.setPassword(tokens[2]);
                 return loginMessage;
-            case MSG_SEND:
-                SendMessage sendMessage = new SendMessage();
-                sendMessage.setChatId(Long.valueOf(tokens[1]));
-                sendMessage.setMessage(tokens[2]);
-                return sendMessage;
+            case CHAT_SEND:
+                ChatSendMessage chatSendMessage = new ChatSendMessage();
+                chatSendMessage.setChatId(Long.valueOf(tokens[1]));
+                StringBuilder textMsg = new StringBuilder();
+                for(int i = 2; i < tokens.length; ++i) {
+                    textMsg.append(tokens[i] + " ");
+                }
+                chatSendMessage.setMessage(textMsg.toString());
+                return chatSendMessage;
             case SIMPLE_MSG:
                 SimpleMessage simpleMessage = new SimpleMessage();
                 simpleMessage.setMessage(tokens[1]);
@@ -51,7 +61,7 @@ public class StringProtocol implements Protocol {
                 registerMessage.setPassword(tokens[2]);
                 return registerMessage;
             case USER_HELP:
-                HelpMessage helpMessage =  new HelpMessage();
+                HelpMessage helpMessage = new HelpMessage();
                 return helpMessage;
             case USER_INFO:
                 InfoMessage infoMessage = new InfoMessage();
@@ -60,6 +70,27 @@ public class StringProtocol implements Protocol {
                     infoMessage.setUserId(Long.valueOf(tokens[2]));
                 }
                 return infoMessage;
+            case USER_PASS:
+                PassMessage passMessage = new PassMessage();
+                passMessage.setOldPass(tokens[1]);
+                passMessage.setNewPass(tokens[2]);
+                return passMessage;
+            case CHAT_LIST:
+                ChatListMessage chatListMessage = new ChatListMessage();
+                return chatListMessage;
+            case CHAT_CREATE:
+                ChatCreateMessage chatCreateMessage = new ChatCreateMessage();
+                for (int i = 1; i < tokens.length; ++i) {
+                    chatCreateMessage.addId(Long.valueOf(tokens[i]));
+                }
+                return chatCreateMessage;
+            case CHAT_HISTORY:
+                ChatHistoryMessage chatHistoryMessage = new ChatHistoryMessage();
+                chatHistoryMessage.setChatId(Long.valueOf(tokens[1]));
+                chatHistoryMessage.setHasArg(Boolean.valueOf(tokens[2]));
+                if (chatHistoryMessage.isHasArg()) {
+                    chatHistoryMessage.setCountOfMessages(Long.valueOf(tokens[3]));
+                }
             default:
                 throw new RuntimeException("Invalid type: " + type);
         }
@@ -76,10 +107,10 @@ public class StringProtocol implements Protocol {
                 builder.append(loginMessage.getLogin()).append(DELIMITER);
                 builder.append(loginMessage.getPassword()).append(DELIMITER);
                 break;
-            case MSG_SEND:
-                SendMessage sendMessage = (SendMessage) msg;
-                builder.append(sendMessage.getChatId()).append(DELIMITER);
-                builder.append(sendMessage.getMessage()).append(DELIMITER);
+            case CHAT_SEND:
+                ChatSendMessage chatSendMessage = (ChatSendMessage) msg;
+                builder.append(chatSendMessage.getChatId()).append(DELIMITER);
+                builder.append(chatSendMessage.getMessage()).append(DELIMITER);
                 break;
             case SIMPLE_MSG:
                 SimpleMessage simpleMessage = (SimpleMessage) msg;
@@ -100,6 +131,34 @@ public class StringProtocol implements Protocol {
                     builder.append(infoMessage.getUserId()).append(DELIMITER);
                 }
                 break;
+            case USER_PASS:
+                PassMessage passMessage = (PassMessage) msg;
+                builder.append(passMessage.getOldPass()).append(DELIMITER);
+                builder.append(passMessage.getNewPass()).append(DELIMITER);
+                break;
+            case CHAT_LIST:
+                ChatListMessage chatListMessage = (ChatListMessage) msg;
+                break;
+            case CHAT_CREATE:
+                ChatCreateMessage chatCreateMessage = (ChatCreateMessage) msg;
+                List<Long> ids = chatCreateMessage.getChatUserIds();
+                for (Long id : ids) {
+                    builder.append(id.toString()).append(DELIMITER);
+                }
+                break;
+            case CHAT_FIND:
+                ChatFindMessage chatFindMessage = (ChatFindMessage) msg;
+                builder.append(chatFindMessage.getPattern()).append(DELIMITER);
+                break;
+            case CHAT_HISTORY:
+                ChatHistoryMessage chatHistoryMessage = (ChatHistoryMessage) msg;
+                builder.append(chatHistoryMessage.getChatId().toString()).append(DELIMITER);
+                builder.append(chatHistoryMessage.isHasArg()).append(DELIMITER);
+                if (chatHistoryMessage.isHasArg()) {
+                    builder.append(chatHistoryMessage.getCountOfMessages()).append(DELIMITER);
+                }
+                break;
+
             default:
                 throw new RuntimeException("Invalid type: " + type);
 

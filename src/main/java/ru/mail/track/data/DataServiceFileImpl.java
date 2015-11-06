@@ -1,4 +1,4 @@
-package ru.mail.track.download;
+package ru.mail.track.data;
 
 import ru.mail.track.message.User;
 import ru.mail.track.message.messagetypes.Message;
@@ -19,13 +19,13 @@ import java.util.Map;
 /**
  * Created by aliakseisemchankau on 22.10.15.
  */
-public class DownloadServiceFileImpl implements DownloadService {
+public class DataServiceFileImpl implements DataService {
 
     private String userInfoDirectory;
     private String fileLogins;
     private String filePasswords;
 
-    public DownloadServiceFileImpl() {
+    public DataServiceFileImpl() {
         init();
     }
 
@@ -49,9 +49,8 @@ public class DownloadServiceFileImpl implements DownloadService {
                 if (currentUserName != null) {
                     byte[] currentHash = new byte[32];
                     fis.read(currentHash);
-                    String i = br.readLine();
-                    System.out.println("i =" + i);
-                    Long id = Long.valueOf(i);
+
+                    Long id = Long.valueOf(br.readLine());
                     System.out.println(currentUserName + ", id = " + id.toString());
                     User user = new User(currentUserName, currentHash);
                     user.setUserID(id);
@@ -62,7 +61,7 @@ public class DownloadServiceFileImpl implements DownloadService {
             }
 
         } catch (Exception exc) {
-            throw new Exception("can't download " + fileLogins + " or " + filePasswords);
+            throw new Exception("can't open " + fileLogins + " or " + filePasswords);
         }
 
         return users;

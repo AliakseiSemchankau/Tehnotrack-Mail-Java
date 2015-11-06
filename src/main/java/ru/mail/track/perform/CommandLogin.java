@@ -33,7 +33,7 @@ public class CommandLogin implements Command {
 
         session.setSessionUser(user);
 
-        return new Result(true, "");
+        return new Result(true, "", "user with login=" + userName + " have authorized succesfully");
 
     }
 }

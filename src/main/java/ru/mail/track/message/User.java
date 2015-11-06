@@ -36,6 +36,9 @@ public class User {
         userID = id;
     }
 
+    public void setPass(final String password) {
+        hash = AuthorizationService.calcHash(password);
+    }
 
 
 }

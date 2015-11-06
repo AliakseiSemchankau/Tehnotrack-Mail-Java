@@ -5,7 +5,7 @@ import ru.mail.track.perform.CommandType;
 /**
  * Created by aliakseisemchankau on 3.11.15.
  */
-public class SendMessage extends Message {
+public class ChatSendMessage extends Message {
 
     private Long chatId;
 
@@ -17,12 +17,13 @@ public class SendMessage extends Message {
         this.chatId = chatId;
     }
 
-    public SendMessage() {
-        setType(CommandType.MSG_SEND);
+    public ChatSendMessage() {
+        setType(CommandType.CHAT_SEND);
     }
 
-    public SendMessage(String text) {
-        setType(CommandType.MSG_SEND);
+    public ChatSendMessage(Long chatId, String text) {
+        this.chatId = chatId;
+        setType(CommandType.CHAT_SEND);
         setMessage(text);
     }
 

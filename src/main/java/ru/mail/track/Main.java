@@ -1,6 +1,7 @@
 package ru.mail.track;
 
-import ru.mail.track.download.DownloadServiceFileImpl;
+import ru.mail.track.data.DataService;
+import ru.mail.track.data.DataServiceFileImpl;
 import ru.mail.track.message.CommandHandler;
 import ru.mail.track.message.MessageStore;
 import ru.mail.track.message.MessageStoreStub;
@@ -14,9 +15,11 @@ public class Main {
 
     public static void main(String[] args) throws Exception {
         UserStorage store = new UserStorage();
-        store.initialize(new DownloadServiceFileImpl());
+        DataService dataService = new DataServiceFileImpl();
 
-        MessageStore messageStore = new MessageStoreStub();
+        store.initialize(dataService);
+
+        MessageStore messageStore = new MessageStoreStub(dataService);
 
         ThreadedServer server = new ThreadedServer(store, new CommandHandler(store, messageStore));
         server.startServer();

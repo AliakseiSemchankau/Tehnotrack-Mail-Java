@@ -5,13 +5,13 @@ import ru.mail.track.perform.CommandType;
 /**
  * Created by aliakseisemchankau on 4.11.15.
  */
-public class FindMessage extends Message {
+public class ChatFindMessage extends Message {
 
     private String pattern;
     private Long chatId;
 
-    public FindMessage() {
-        setType(CommandType.USER_FIND);
+    public ChatFindMessage() {
+        setType(CommandType.CHAT_FIND);
     }
 
     public Long getChatId() {

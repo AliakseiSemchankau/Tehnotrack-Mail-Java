@@ -2,12 +2,17 @@ package ru.mail.track.net;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import ru.mail.track.message.messagetypes.ChatCreateMessage;
+import ru.mail.track.message.messagetypes.ChatFindMessage;
+import ru.mail.track.message.messagetypes.ChatHistoryMessage;
+import ru.mail.track.message.messagetypes.ChatListMessage;
 import ru.mail.track.message.messagetypes.HelpMessage;
 import ru.mail.track.message.messagetypes.InfoMessage;
 import ru.mail.track.message.messagetypes.LoginMessage;
 import ru.mail.track.message.messagetypes.Message;
+import ru.mail.track.message.messagetypes.PassMessage;
 import ru.mail.track.message.messagetypes.RegisterMessage;
-import ru.mail.track.message.messagetypes.SendMessage;
+import ru.mail.track.message.messagetypes.ChatSendMessage;
 import ru.mail.track.message.messagetypes.SimpleMessage;
 import ru.mail.track.perform.CommandType;
 
@@ -51,7 +56,6 @@ public class ThreadedClient implements MessageListener {
         String cmdType = tokens[0];
 
 
-
         if ("\\login".equals(cmdType)) {
             LoginMessage loginMessage = new LoginMessage();
             loginMessage.setType(CommandType.USER_LOGIN);
@@ -61,14 +65,14 @@ public class ThreadedClient implements MessageListener {
             return;
         }
 
-        if ("\\send".equals(cmdType)) {
-            SendMessage sendMessage = new SendMessage();
-            sendMessage.setType(CommandType.MSG_SEND);
-            sendMessage.setChatId(Long.valueOf(tokens[1]));
-            sendMessage.setMessage(tokens[2]);
-            handler.send(sendMessage);
+       /* if ("\\send".equals(cmdType)) {
+            ChatSendMessage chatSendMessage = new ChatSendMessage();
+            chatSendMessage.setType(CommandType.CHAT_SEND);
+            chatSendMessage.setChatId(Long.valueOf(tokens[1]));
+            chatSendMessage.setMessage(tokens[2]);
+            handler.send(chatSendMessage);
             return;
-        }
+        }*/
 
         if ("\\simple".equals(cmdType)) {
             SimpleMessage simpleMessage = new SimpleMessage();
@@ -94,7 +98,7 @@ public class ThreadedClient implements MessageListener {
             return;
         }
 
-        if ("\\userinfo".equals(cmdType)) {
+        if ("\\user_info".equals(cmdType)) {
             InfoMessage infoMessage = new InfoMessage();
             infoMessage.setType(CommandType.USER_INFO);
             if (tokens.length > 1) {
@@ -105,7 +109,67 @@ public class ThreadedClient implements MessageListener {
             return;
         }
 
-        System.out.println("Invalid input: " + line);
+        if ("\\user_pass".equals(cmdType)) {
+            PassMessage passMessage = new PassMessage();
+            passMessage.setType(CommandType.USER_PASS);
+            passMessage.setOldPass(tokens[1]);
+            passMessage.setNewPass(tokens[2]);
+            handler.send(passMessage);
+            return;
+        }
+
+        if ("\\chat_list".equals(cmdType)) {
+            ChatListMessage chatListMessage = new ChatListMessage();
+            chatListMessage.setType(CommandType.CHAT_LIST);
+            handler.send(chatListMessage);
+            return;
+        }
+
+        if ("\\chat_create".equals(cmdType)) {
+            ChatCreateMessage chatCreateMessage = new ChatCreateMessage();
+            chatCreateMessage.setType(CommandType.CHAT_CREATE);
+            for(int i = 1; i < tokens.length; ++i) {
+                String token = tokens[i];
+                chatCreateMessage.addId(Long.valueOf(token));
+            }
+            handler.send(chatCreateMessage);
+            return;
+        }
+
+        if ("\\chat_history".equals(cmdType)) {
+            ChatHistoryMessage chatHistoryMessage = new ChatHistoryMessage();
+            chatHistoryMessage.setType(CommandType.CHAT_HISTORY);
+            chatHistoryMessage.setChatId(Long.valueOf(tokens[1]));
+            if (tokens.length > 2) {
+                chatHistoryMessage.setHasArg(true);
+                chatHistoryMessage.setCountOfMessages(Long.valueOf(tokens[2]));
+            }
+            handler.send(chatHistoryMessage);
+            return;
+        }
+
+        if ("\\chat_find".equals(cmdType)) {
+            ChatFindMessage chatFindMessage = new ChatFindMessage();
+            chatFindMessage.setType(CommandType.CHAT_FIND);
+            chatFindMessage.setPattern(tokens[1]);
+            handler.send(chatFindMessage);
+            return;
+        }
+
+        if ("\\chat_send".equals(cmdType)) {
+            ChatSendMessage chatSendMessage = new ChatSendMessage();
+            chatSendMessage.setType(CommandType.CHAT_SEND);
+            chatSendMessage.setChatId(Long.valueOf(tokens[1]));
+            StringBuilder textMsg = new StringBuilder();
+            for(int i = 2; i < tokens.length; ++i) {
+                textMsg.append(tokens[2] + " ");
+            }
+            chatSendMessage.setMessage(textMsg.toString());
+            handler.send(chatSendMessage);
+            return;
+        }
+
+            System.out.println("Invalid input: " + line);
 
     }
 

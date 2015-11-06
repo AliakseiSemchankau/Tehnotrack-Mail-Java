@@ -46,4 +46,10 @@ public class Result {
         this.errorMsg = errorMsg;
     }
 
+    public Result(final boolean status, final String errorMsg, final String textMsg) {
+        this.status = status;
+        this.errorMsg = errorMsg;
+        this.textMSG = textMsg;
+    }
+
 }

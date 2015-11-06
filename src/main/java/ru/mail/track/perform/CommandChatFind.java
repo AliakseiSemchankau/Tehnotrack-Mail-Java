@@ -1,6 +1,6 @@
 package ru.mail.track.perform;
 
-import ru.mail.track.message.messagetypes.FindMessage;
+import ru.mail.track.message.messagetypes.ChatFindMessage;
 import ru.mail.track.message.messagetypes.Message;
 import ru.mail.track.message.MessageStore;
 import ru.mail.track.message.Result;
@@ -13,18 +13,18 @@ import java.util.List;
 /**
  * Created by aliakseisemchankau on 15.10.15.
  */
-public class CommandFind implements Command {
+public class CommandChatFind implements Command {
     @Override
     public Result perform(Message msg, Session session, UserStorage userStorage, MessageStore messageStore) {
 
-        FindMessage findMessage = (FindMessage) msg;
+        ChatFindMessage chatFindMessage = (ChatFindMessage) msg;
 
-        String pattern = findMessage.getPattern();
+        String pattern = chatFindMessage.getPattern();
         pattern = ".*" + pattern + ".*";
 
         User user = session.getSessionUser();
 
-        Long chatId = findMessage.getChatId();
+        Long chatId = chatFindMessage.getChatId();
 
         if (user == null) {
             return new Result(false, "you weren't authorized:(");

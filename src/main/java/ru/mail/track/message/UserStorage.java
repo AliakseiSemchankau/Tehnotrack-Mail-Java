@@ -1,10 +1,8 @@
 package ru.mail.track.message;
 
-import ru.mail.track.download.DownloadService;
+import ru.mail.track.data.DataService;
 
 import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.Lock;
@@ -16,7 +14,7 @@ import java.util.concurrent.locks.ReentrantLock;
 public class UserStorage implements IUserStore {
 
     private Map<Long, User> users;           // login -> corresponding User
-    private DownloadService dService;          //downloading service for saving user information
+    private DataService dService;          //downloading service for saving user information
     private Map<String, Long> userLogins = new HashMap<>();
     private AtomicLong userCounter;
 
@@ -53,8 +51,8 @@ public class UserStorage implements IUserStore {
         if (id == null) {
             return null;
         }
-        if (AuthorizationService.isCorrect(users.get(name), pass)) {
-            return users.get(name);
+        if (AuthorizationService.isCorrect(users.get(id), pass)) {
+            return users.get(id);
         }
         return null;
     }
@@ -68,15 +66,17 @@ public class UserStorage implements IUserStore {
     }
 
     @Override
-    public void initialize(DownloadService dService) throws Exception {
+    public void initialize(DataService dService) throws Exception {
 
+        this.dService = dService;
         users = dService.downloadUsers();
         for (Map.Entry<Long, User> entry : users.entrySet()) {
             System.out.println(entry.getKey() + " " + entry.getValue().getName());
         }
         userCounter = new AtomicLong(users.size());
-        this.dService = dService;
+        System.out.println("////////////");
         for(Long id : users.keySet()){
+            System.out.println(users.get(id).getName() + " " + id.toString());
             userLogins.put(users.get(id).getName(), id);
         }
     }

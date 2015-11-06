@@ -1,4 +1,4 @@
-package ru.mail.track.download;
+package ru.mail.track.data;
 
 import ru.mail.track.message.User;
 import ru.mail.track.message.messagetypes.Message;
@@ -9,7 +9,7 @@ import java.util.Map;
 /**
  * Created by aliakseisemchankau on 22.10.15.
  */
-public interface DownloadService {
+public interface DataService {
 
     public void init();
 
