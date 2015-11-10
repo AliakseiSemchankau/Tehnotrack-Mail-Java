@@ -71,12 +71,12 @@ public class UserStorage implements IUserStore {
         this.dService = dService;
         users = dService.downloadUsers();
         for (Map.Entry<Long, User> entry : users.entrySet()) {
-            System.out.println(entry.getKey() + " " + entry.getValue().getName());
+            //System.out.println(entry.getKey() + " " + entry.getValue().getName());
         }
         userCounter = new AtomicLong(users.size());
-        System.out.println("////////////");
+        //System.out.println("////////////");
         for(Long id : users.keySet()){
-            System.out.println(users.get(id).getName() + " " + id.toString());
+            //System.out.println(users.get(id).getName() + " " + id.toString());
             userLogins.put(users.get(id).getName(), id);
         }
     }

@@ -51,7 +51,7 @@ public class DataServiceFileImpl implements DataService {
                     fis.read(currentHash);
 
                     Long id = Long.valueOf(br.readLine());
-                    System.out.println(currentUserName + ", id = " + id.toString());
+                    //System.out.println(currentUserName + ", id = " + id.toString());
                     User user = new User(currentUserName, currentHash);
                     user.setUserID(id);
                     users.put(id, user);
