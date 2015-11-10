@@ -2,12 +2,13 @@ package ru.mail.track.message.messagetypes;
 
 import ru.mail.track.perform.CommandType;
 
+import java.io.Serializable;
 import java.util.Date;
 
 /**
  * Created by aliakseisemchankau on 15.10.15.
  */
-public class Message {
+public class Message implements Serializable {
 
     private String message;
     private String timeStamp;

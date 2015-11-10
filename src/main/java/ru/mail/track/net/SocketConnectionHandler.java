@@ -28,7 +28,7 @@ public class SocketConnectionHandler implements ConnectionHandler {
     private Socket socket;
     private InputStream in;
     private OutputStream out;
-    private Protocol protocol = new StringProtocol();
+    private Protocol protocol = new SerializableProtocol();
     private long uniqueID;
 
     public SocketConnectionHandler(Socket socket) throws IOException {
