@@ -37,8 +37,8 @@ public class Result {
     @Override
     public String toString() {
         return "{ status: " + status + ", " +
-                "errorMsg: " + errorMsg + ", " +
-                "textMsg: " + textMSG + " }";
+                "errorMsg:" + errorMsg + ", " +
+                "textMsg:\n" + textMSG + " }";
     }
 
     public Result(final boolean status, final String errorMsg) {

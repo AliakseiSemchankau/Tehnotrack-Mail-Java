@@ -27,4 +27,19 @@ public class ChatSendMessage extends Message {
         setMessage(text);
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        ChatSendMessage that = (ChatSendMessage) o;
+
+        return !(chatId != null ? !chatId.equals(that.chatId) : that.chatId != null);
+
+    }
+
+    @Override
+    public int hashCode() {
+        return chatId != null ? chatId.hashCode() : 0;
+    }
 }

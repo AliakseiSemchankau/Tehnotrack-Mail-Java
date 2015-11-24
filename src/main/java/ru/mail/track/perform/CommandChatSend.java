@@ -17,14 +17,14 @@ public class CommandChatSend implements Command {
 
         ChatSendMessage chatSendMessage = (ChatSendMessage) msg;
 
-        User user =  session.getSessionUser();
+        User user = session.getSessionUser();
         if (user == null) {
             return new Result(false, "you weren't authorized");
         }
 
         if (!messageStore.getChatById(chatSendMessage.getChatId()).getParticipantIds().contains(user.getUserID())) {
             return new Result(false, "user with id=" + user.getUserID() +
-                    "wasn't invited to chat with id="+chatSendMessage.getChatId());
+                    "wasn't invited to chat with id=" + chatSendMessage.getChatId());
         }
 
         chatSendMessage.setSender(user.getUserID());

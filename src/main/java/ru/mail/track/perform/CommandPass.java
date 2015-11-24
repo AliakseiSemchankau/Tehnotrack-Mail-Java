@@ -28,6 +28,8 @@ public class CommandPass implements Command {
 
         user.setPass(passMessage.getNewPass());
 
+        userStorage.updateUserPass(user);
+
         return new Result(true, "", "you've succesfully changed the password");
 
     }

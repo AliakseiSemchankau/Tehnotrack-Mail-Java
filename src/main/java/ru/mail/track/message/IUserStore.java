@@ -33,4 +33,6 @@ public interface IUserStore {
 
     boolean isUserExist(String login);
 
+    void updateUserPass(User user);
+
 }

@@ -46,6 +46,6 @@ public interface MessageStore {
      */
     void addUserToChat(Long userId, Long chatId);
 
-    Chat createChat(List<Long> userIds);
+    Chat createChat(Long chatCreator, List<Long> userIds);
 
 }

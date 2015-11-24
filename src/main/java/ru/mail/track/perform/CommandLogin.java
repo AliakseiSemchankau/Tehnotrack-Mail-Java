@@ -22,7 +22,7 @@ public class CommandLogin implements Command {
         String password = loginMsg.getPassword();
 
         if (!userStorage.isUserExist(userName)) {
-            return new Result(false, "such user doesn't exist");
+            return new Result(false, "user with userName=" + userName + " doesn't exist");
         }
 
         User user = userStorage.getUser(userName, password);

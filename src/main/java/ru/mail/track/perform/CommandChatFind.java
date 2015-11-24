@@ -42,7 +42,7 @@ public class CommandChatFind implements Command {
             Message chatMsg = messageStore.getMessageById(id);
             try {
                 if (chatMsg.getMessage().matches(pattern)) {
-                    sb.append(chatMsg.getMessage());
+                    sb.append(chatMsg.toString());
                     sb.append("\n");
                 }
             } catch (java.util.regex.PatternSyntaxException psExc) {

@@ -31,14 +31,11 @@ public class ThreadedServer implements MessageListener {
     private volatile boolean isRunning;
     private Map<Long, ConnectionHandler> handlers = new HashMap<>();
     private ServerSocket sSocket;
-    private UserStorage store;
     private CommandHandler commandHandler;
-    private Map<Long, User> userMap = new TreeMap<>();
     private SessionManager sessionManager = new SessionManager();
     static Logger log = LoggerFactory.getLogger(ThreadedServer.class);
 
-    public ThreadedServer(UserStorage store, CommandHandler commandHandler) {
-        this.store = store;
+    public ThreadedServer(CommandHandler commandHandler) {
         this.commandHandler = commandHandler;
 
         try {

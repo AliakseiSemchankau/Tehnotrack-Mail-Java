@@ -12,6 +12,7 @@ public class Chat {
     /**
      * Храним список идентификаторов
      */
+    private Long creatorId;
     private List<Long> messageIds = new ArrayList<>();
     private List<Long> participantIds = new ArrayList<>();
 
@@ -21,6 +22,14 @@ public class Chat {
 
     public void setId(Long id) {
         this.id = id;
+    }
+
+    public void setCreatorId(Long creatorId) {
+        this.creatorId = creatorId;
+    }
+
+    public Long getCreatorId() {
+        return creatorId;
     }
 
     public List<Long> getMessageIds() {

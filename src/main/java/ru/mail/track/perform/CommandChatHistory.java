@@ -32,6 +32,10 @@ public class CommandChatHistory implements Command {
 
         List<Long> commentsHistory = messageStore.getMessagesFromChat(chatId);
 
+        for(Long id : commentsHistory) {
+            System.out.println("message id=" + id);
+        }
+
         long countOfComments = commentsHistory.size();
 
         if (chatHistoryMessage.isHasArg()) {
@@ -44,6 +48,10 @@ public class CommandChatHistory implements Command {
         StringBuilder textMsg = new StringBuilder();
 
         for (long i = commentsHistory.size() - countOfComments; i < commentsHistory.size(); ++i) {
+            System.out.println("i=" + i);
+            Long id = commentsHistory.get((int) i);
+            System.out.println("id=" + id);
+            System.out.println(messageStore.getMessageById(id));
             textMsg.append(messageStore.getMessageById(commentsHistory.get((int)i)).toString() + "\n");
         }
 

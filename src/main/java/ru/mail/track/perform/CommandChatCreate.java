@@ -39,7 +39,20 @@ public class CommandChatCreate implements Command {
             }
         }
 
-        Chat chat = messageStore.createChat(chatIds);
+        if (chatIds.size() == 2) {
+            List<Long> userChatIds = messageStore.getChatsByUserId(user.getUserID());
+            for(Long chatId : userChatIds) {
+                Chat currentChat = messageStore.getChatById(chatId);
+                List<Long> participants = currentChat.getParticipantIds();
+                if (participants.size() == 2 && participants.containsAll(chatCreateMessage.getChatUserIds())) {
+                    return new Result(true, "", "chat with user ids " + chatCreateMessage.getChatUserIds() +
+                    " already exists, id=" + currentChat.getId());
+                }
+            }
+        }
+
+        Chat chat = messageStore.createChat(user.getUserID(), chatIds);
+
 
         StringBuilder usersInChat = new StringBuilder();
         for(Long id : chatIds) {

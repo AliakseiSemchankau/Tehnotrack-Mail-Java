@@ -163,7 +163,7 @@ public class ThreadedClient implements MessageListener {
             chatSendMessage.setChatId(Long.valueOf(tokens[1]));
             StringBuilder textMsg = new StringBuilder();
             for(int i = 2; i < tokens.length; ++i) {
-                textMsg.append(tokens[2] + " ");
+                textMsg.append(tokens[i] + " ");
             }
             chatSendMessage.setMessage(textMsg.toString());
             handler.send(chatSendMessage);
@@ -180,11 +180,11 @@ public class ThreadedClient implements MessageListener {
      */
     @Override
     public void onMessage(Message msg, long id) {
-        System.out.printf("THREADED CLIENT: %s", msg.getMessage());
+        System.out.printf("THREADED CLIENT:\n %s", msg.getMessage());
     }
 
 
-    public static void main(String[] args) throws Exception {
+    public static void main(String[] args){
         ThreadedClient client = new ThreadedClient();
 
         Scanner scanner = new Scanner(System.in);
@@ -197,7 +197,11 @@ public class ThreadedClient implements MessageListener {
                 System.out.println("well, that's the end");
                 return;
             }
-            client.processInput(input);
+            try {
+                client.processInput(input);
+            } catch (Exception e) {
+                System.err.println("some troubles occured while parsing input=" + input);
+            }
         }
     }
 

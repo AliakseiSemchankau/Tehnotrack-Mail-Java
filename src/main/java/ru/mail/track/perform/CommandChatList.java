@@ -31,7 +31,8 @@ public class CommandChatList implements Command {
 
         StringBuilder chatList = new StringBuilder();
         for(Long chatId : chatIds) {
-            chatList.append("id="+chatId.toString()+"\n");
+            List<Long> usersInChat = messageStore.getUsersByChatId(chatId);
+            chatList.append("id="+chatId.toString()+"\n users are:" + usersInChat.toString() + "\n\n");
         }
 
         return new Result(true, "", "your chat are:\n" + chatList);
