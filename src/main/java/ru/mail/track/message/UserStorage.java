@@ -46,7 +46,8 @@ public class UserStorage implements IUserStore {
         try {
             user = dService.getUser(name);
         } catch (Exception e) {
-            System.out.println("some troubles with downloading user with login=" + name);
+            e.printStackTrace();
+            System.err.println("some troubles with downloading user with login=" + name);
             return null;
         }
 
@@ -107,5 +108,9 @@ public class UserStorage implements IUserStore {
         }
     }
 
+    @Override
+    public void close() {
+        dService.close();
+    }
 
 }

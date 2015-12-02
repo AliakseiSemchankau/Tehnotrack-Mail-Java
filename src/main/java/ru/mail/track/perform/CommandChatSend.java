@@ -6,7 +6,10 @@ import ru.mail.track.message.User;
 import ru.mail.track.message.UserStorage;
 import ru.mail.track.message.messagetypes.ChatSendMessage;
 import ru.mail.track.message.messagetypes.Message;
+import ru.mail.track.net.SessionManager;
 import ru.mail.track.session.Session;
+
+import java.util.List;
 
 /**
  * Created by aliakseisemchankau on 6.11.15.
@@ -30,6 +33,25 @@ public class CommandChatSend implements Command {
         chatSendMessage.setSender(user.getUserID());
 
         messageStore.addMessage(chatSendMessage.getChatId(), chatSendMessage);
+
+        List<Long> userIds = messageStore.getChatById(chatSendMessage.getChatId()).getParticipantIds();
+
+
+
+        for (Long userId : userIds) {
+            //System.out.println("COMMAND CHAT SEND participant id: " + userId.toString());
+            try {
+                SessionManager sessionManager = session.getSessionManager();
+                Session userSession = sessionManager.getSessionByUser(userId);
+                if (userSession == null) {
+                    continue;
+                }
+                userSession.send(chatSendMessage);
+                //session.getSessionManager().getSession(userId).send(chatSendMessage);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
 
         return new Result(true, "", "your message has been sended succesfully!");
 

@@ -26,7 +26,7 @@ public class CommandRegister implements Command {
         User user = new User(login, password);
 
         userStorage.addUser(user);
-        session.setSessionUser(user);
+        //session.setSessionUser(user);
 
         return new Result(true, "");
 

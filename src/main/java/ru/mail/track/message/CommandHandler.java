@@ -1,5 +1,6 @@
 package ru.mail.track.message;
 
+import ru.mail.track.data.DataService;
 import ru.mail.track.message.messagetypes.Message;
 import ru.mail.track.perform.*;
 import ru.mail.track.session.Session;
@@ -46,6 +47,10 @@ public class CommandHandler {
             return commandPerformer.get(msg.getType()).perform(msg, session, userStore, messageStore);
         }
         return new Result(false, "such command as " + msg.getType() + " does not exist");
+    }
+
+    public void close() {
+        userStore.close();
     }
 
 }

@@ -35,4 +35,6 @@ public interface IUserStore {
 
     void updateUserPass(User user);
 
+    void close();
+
 }

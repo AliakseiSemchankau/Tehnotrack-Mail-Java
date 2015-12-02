@@ -19,6 +19,10 @@ public class Session {
     public Session() {
     }
 
+    public SessionManager getSessionManager() {
+        return sessionManager;
+    }
+
     public ConnectionHandler getConnectionHandler() {
         return connectionHandler;
     }
