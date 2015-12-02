@@ -1,6 +1,5 @@
 package ru.mail.track.net;
 
-import junit.framework.TestCase;
 import org.junit.Before;
 import org.junit.Test;
 import ru.mail.track.message.messagetypes.ChatSendMessage;
@@ -19,12 +18,14 @@ import static org.junit.Assert.assertEquals;
 public class ProtocolTest {
 
     private final Map<CommandType, Message> messages = new HashMap<>();
-    private Protocol protocol;
+    private Protocol serProtocol;
+    private Protocol refProtocol;
 
     @Before
     public void setup() {
 
-        protocol = new SerializableProtocol();
+        serProtocol = new SerializableProtocol();
+        refProtocol = new ReflectionProtocol();
 
         LoginMessage login = new LoginMessage();
         login.setSender(123L);
@@ -40,19 +41,36 @@ public class ProtocolTest {
     }
 
     @Test
-    public void testLogin() throws Exception {
+    public void testSerLogin() throws Exception {
 
         Message origin = messages.get(CommandType.USER_LOGIN);
-        byte[] data = protocol.encode(origin);
-        Message copy = protocol.decode(data);
+        byte[] data = serProtocol.encode(origin);
+        Message copy = serProtocol.decode(data);
         assertEquals(origin, copy);
     }
 
     @Test
-    public void testSend() throws Exception {
+    public void testSerSend() throws Exception {
         Message origin = messages.get(CommandType.CHAT_SEND);
-        byte[] data = protocol.encode(origin);
-        Message copy = protocol.decode(data);
+        byte[] data = serProtocol.encode(origin);
+        Message copy = serProtocol.decode(data);
+        assertEquals(origin, copy);
+    }
+
+    @Test
+    public void testRefLogin() throws Exception {
+
+        Message origin = messages.get(CommandType.USER_LOGIN);
+        byte[] data = refProtocol.encode(origin);
+        Message copy = refProtocol.decode(data);
+        assertEquals(origin, copy);
+    }
+
+    @Test
+    public void testRefSend() throws Exception {
+        Message origin = messages.get(CommandType.CHAT_SEND);
+        byte[] data = refProtocol.encode(origin);
+        Message copy = refProtocol.decode(data);
         assertEquals(origin, copy);
     }
 

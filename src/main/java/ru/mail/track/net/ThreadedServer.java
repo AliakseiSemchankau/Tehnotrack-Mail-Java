@@ -23,17 +23,17 @@ import ru.mail.track.session.Session;
 /**
  *
  */
-public class ThreadedServer implements MessageListener {
+public class ThreadedServer implements MessageListener, Server {
 
-    /////////////////static Logger log = LoggerFactory.getLogger(ThreadedServer.class);
+    static Logger log = LoggerFactory.getLogger(ThreadedServer.class);
 
-    public static final int PORT = 19000;
+    public static final int PORT = 19001;
     private volatile boolean isRunning;
-    private Map<Long, ConnectionHandler> handlers = new HashMap<>();
+    private Map<Long, Thread> handlers = new HashMap<>();
     private ServerSocket sSocket;
     private CommandHandler commandHandler;
     private SessionManager sessionManager = new SessionManager();
-    static Logger log = LoggerFactory.getLogger(ThreadedServer.class);
+    //static Logger log = LoggerFactory.getLogger(ThreadedServer.class);
 
     public ThreadedServer(CommandHandler commandHandler) {
         this.commandHandler = commandHandler;
@@ -47,42 +47,68 @@ public class ThreadedServer implements MessageListener {
         }
     }
 
-    public void startServer() throws Exception {
+    @Override
+    public void startServer() {
         //////////////log.info("Started, waiting for connection");
         System.out.println("Started, waiting for connection");
 
         isRunning = true;
         while (isRunning) {
-            Socket socket = sSocket.accept();
+            Socket socket = null;
+            try {
+                socket = sSocket.accept();
+            } catch (IOException ioExc) {
+                System.err.println("THREADED SERVER::START SERVER: failed to accept sSocket");
+                continue;
+            }
             //////////////log.info("Accepted. " + socket.getInetAddress());
             System.out.println("Accepted" + socket.getInetAddress());
-            ConnectionHandler handler = new SocketConnectionHandler(socket);
-            handler.addListener(this);
+            try {
+                ConnectionHandler handler = new SocketConnectionHandler(socket);
+                handler.addListener(this);
 
-            Session session = sessionManager.createSession();
-            session.setSessionManager(sessionManager);
-            session.setConnectionHandler(handler);
-            handlers.put(session.getId(), handler);
-            handler.setID(session.getId());
-            Thread thread = new Thread(handler);
-            thread.start();
+                Session session = sessionManager.createSession();
+                session.setSessionManager(sessionManager);
+                session.setConnectionHandler(handler);
+                handlers.put(session.getId(), new Thread(handler));
+                handler.setID(session.getId());
+                handlers.get(session.getId()).start();
+            } catch (IOException ioExc) {
+                System.err.println("THREADED SERVER::START SERVER : failed to crate " +
+                        "handler for socket with address " +
+                        socket.getInetAddress());
+                ioExc.printStackTrace();
+            }
         }
+
     }
 
-    public void stopServer() {
+    @Override
+    public void destroyServer() {
         isRunning = false;
-        for (ConnectionHandler handler : handlers.values()) {
-            handler.stop();
+        System.out.println("done!");
+        try {
+            sSocket.close();
+        } catch (IOException ioExc) {
+            System.err.println("THREADED SERVER:DESTROY SERVER: failed to close sSocket");
+            ioExc.printStackTrace();
         }
+        System.out.println("closing handlers");
+        for (Thread handler : handlers.values()) {
+            handler.interrupt();
+        }
+        System.out.println("handlers closed successfully");
+        commandHandler.close();
+        System.out.println("commandHandler closed succesfully");
     }
 
     @Override
     public void onMessage(Message message, long id) {
 
-        log.info("THREADED SERVER:onMessage: {}", message);
+        //log.info("THREADED SERVER:onMessage: {}", message);
 
         Result result = commandHandler.work(message, sessionManager.getSession(id));
-        log.info("THREADED SERVER:onMessage, result: {}", result.toString());
+        //log.info("THREADED SERVER:onMessage, result: {}", result.toString());
         try {
             sessionManager.getSession(id).send(new SimpleMessage(result.toString()));
         } catch (Exception exc) {

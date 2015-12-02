@@ -322,6 +322,11 @@ public class DataServiceDBImpl implements DataService {
     }
 
     @Override
+    public void close() {
+        queryExecutor.close();
+    }
+
+    @Override
     public User addUser(String userName, String password) throws Exception {
 
         User user;

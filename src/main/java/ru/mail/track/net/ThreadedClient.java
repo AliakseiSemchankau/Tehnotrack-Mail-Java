@@ -26,12 +26,26 @@ import java.util.Scanner;
  */
 public class ThreadedClient implements MessageListener {
 
-    public static final int PORT = 19000;
+    public static final int PORT = 19001;
     public static final String HOST = "localhost";
-
-    static Logger log = LoggerFactory.getLogger(ThreadedClient.class);
+    Thread socketHandler;
+    //static Logger log = LoggerFactory.getLogger(ThreadedClient.class);
 
     ConnectionHandler handler;
+
+    public ConnectionHandler getHandler() {
+        return handler;
+    }
+
+    public void stop() {
+        socketHandler.interrupt();
+        try {
+            socketHandler.join();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+    }
 
     public ThreadedClient() {
         try {
@@ -41,7 +55,7 @@ public class ThreadedClient implements MessageListener {
             // Этот класс будет получать уведомления от socket handler
             handler.addListener(this);
 
-            Thread socketHandler = new Thread(handler);
+            socketHandler = new Thread(handler);
             socketHandler.start();
         } catch (IOException e) {
             e.printStackTrace();
@@ -52,7 +66,7 @@ public class ThreadedClient implements MessageListener {
 
     public void processInput(String line) throws IOException {
         String[] tokens = line.split(" ");
-        log.info("Tokens: {}", Arrays.toString(tokens));
+        //log.info("Tokens: {}", Arrays.toString(tokens));
         String cmdType = tokens[0];
 
 
@@ -180,9 +194,18 @@ public class ThreadedClient implements MessageListener {
      */
     @Override
     public void onMessage(Message msg, long id) {
-        System.out.printf("THREADED CLIENT:\n %s", msg.getMessage());
+        if (msg instanceof ChatSendMessage) {
+            ChatSendMessage chmsg = (ChatSendMessage)msg;
+            System.out.println();
+            System.out.println("chat id=" + chmsg.getChatId());
+            System.out.println("sender id=" + chmsg.getSender());
+            System.out.println("timestamp=" + chmsg.getTimeStamp());
+            System.out.println("message=" + chmsg.getMessage());
+            System.out.println();
+        } else {
+            System.out.printf("\nTHREADED CLIENT:\n %s\n", msg.getMessage());
+        }
     }
-
 
     public static void main(String[] args){
         ThreadedClient client = new ThreadedClient();
@@ -195,6 +218,7 @@ public class ThreadedClient implements MessageListener {
             //System.out.println("[" + input + "]");
             if ("q".equals(input)) {
                 System.out.println("well, that's the end");
+                client.stop();
                 return;
             }
             try {

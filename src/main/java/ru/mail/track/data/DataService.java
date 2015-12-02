@@ -46,4 +46,6 @@ public interface DataService {
 
     Message getMessageById(Long messageId);
 
+    void close();
+
 }
