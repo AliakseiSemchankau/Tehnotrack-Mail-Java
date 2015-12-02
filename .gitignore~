@@ -15,7 +15,3 @@ hs_err_pid*
 *.idea
 *.txt
 
-src/stack/*
-src/sql/*
-src/ru/
-
