@@ -6,10 +6,10 @@ import ru.mail.track.message.CommandHandler;
 import ru.mail.track.message.MessageStore;
 import ru.mail.track.message.MessageStoreStub;
 import ru.mail.track.message.UserStorage;
-import ru.mail.track.net.ThreadedServer;
+import ru.mail.track.net.io.ThreadedServer;
 import ru.mail.track.net.Server;
+import ru.mail.track.net.nio.NioServer;
 
-import java.io.InputStream;
 import java.util.Scanner;
 
 /**
@@ -25,7 +25,7 @@ public class Main {
 
         MessageStore messageStore = new MessageStoreStub(dataService);
 
-        Server server = new ThreadedServer(new CommandHandler(userStore,  messageStore));
+        Server server = new NioServer(new CommandHandler(userStore,  messageStore));
 
         Runnable r =  new Runnable() {
 

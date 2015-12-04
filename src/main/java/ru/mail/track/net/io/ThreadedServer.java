@@ -1,11 +1,10 @@
-package ru.mail.track.net;
+package ru.mail.track.net.io;
 
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.TreeMap;
 
 ///////////import org.slf4j.Logger;
 ///////////import org.slf4j.LoggerFactory;
@@ -16,8 +15,8 @@ import ru.mail.track.message.messagetypes.Message;
 import ru.mail.track.message.CommandHandler;
 import ru.mail.track.message.Result;
 import ru.mail.track.message.messagetypes.SimpleMessage;
-import ru.mail.track.message.User;
-import ru.mail.track.message.UserStorage;
+import ru.mail.track.net.Server;
+import ru.mail.track.net.SessionManager;
 import ru.mail.track.session.Session;
 
 /**
@@ -29,7 +28,8 @@ public class ThreadedServer implements MessageListener, Server {
 
     public static final int PORT = 19001;
     private volatile boolean isRunning;
-    private Map<Long, Thread> handlers = new HashMap<>();
+    private Map<Long, ConnectionHandler> handlers = new HashMap<>();
+    private Map<Long, Thread> threadHandlers = new HashMap<>();
     private ServerSocket sSocket;
     private CommandHandler commandHandler;
     private SessionManager sessionManager = new SessionManager();
@@ -45,6 +45,21 @@ public class ThreadedServer implements MessageListener, Server {
             e.printStackTrace();
             System.exit(0);
         }
+    }
+
+    @Override
+    public void send(Message msg, Long sessionId) {
+
+        if (handlers.containsKey(sessionId)) {
+            ConnectionHandler handler = handlers.get(sessionId);
+            try {
+                handler.send(msg);
+            } catch (IOException ioExc) {
+                System.err.println("couldn't send message for sessionId=" + sessionId);
+                ioExc.printStackTrace();
+            }
+        }
+
     }
 
     @Override
@@ -68,11 +83,14 @@ public class ThreadedServer implements MessageListener, Server {
                 handler.addListener(this);
 
                 Session session = sessionManager.createSession();
+                session.setServer(this);
                 session.setSessionManager(sessionManager);
-                session.setConnectionHandler(handler);
-                handlers.put(session.getId(), new Thread(handler));
+                //session.setConnectionHandler(handler);
+
+                threadHandlers.put(session.getId(), new Thread(handler));
+                handlers.put(session.getId(), handler);
                 handler.setID(session.getId());
-                handlers.get(session.getId()).start();
+                threadHandlers.get(session.getId()).start();
             } catch (IOException ioExc) {
                 System.err.println("THREADED SERVER::START SERVER : failed to crate " +
                         "handler for socket with address " +
@@ -94,7 +112,7 @@ public class ThreadedServer implements MessageListener, Server {
             ioExc.printStackTrace();
         }
         System.out.println("closing handlers");
-        for (Thread handler : handlers.values()) {
+        for (Thread handler : threadHandlers.values()) {
             handler.interrupt();
         }
         System.out.println("handlers closed successfully");

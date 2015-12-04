@@ -1,4 +1,4 @@
-package ru.mail.track.net;
+package ru.mail.track.net.io;
 
 import java.io.IOException;
 

@@ -10,16 +10,11 @@ import ru.mail.track.message.MessageStore;
 import ru.mail.track.message.MessageStoreStub;
 import ru.mail.track.message.Result;
 import ru.mail.track.message.UserStorage;
-import ru.mail.track.message.messagetypes.LoginMessage;
 import ru.mail.track.message.messagetypes.Message;
 import ru.mail.track.message.messagetypes.SimpleMessage;
-import ru.mail.track.net.MessageListener;
-import ru.mail.track.net.Server;
-import ru.mail.track.net.ThreadedClient;
-import ru.mail.track.net.ThreadedServer;
-import ru.mail.track.session.Session;
-
-import java.util.Scanner;
+import ru.mail.track.net.io.MessageListener;
+import ru.mail.track.net.io.ThreadedClient;
+import ru.mail.track.net.io.ThreadedServer;
 
 /**
  * Created by aliakseisemchankau on 1.12.15.

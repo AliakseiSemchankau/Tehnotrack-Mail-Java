@@ -1,6 +1,5 @@
-package ru.mail.track.net;
+package ru.mail.track.net.protocol;
 
-import org.mockito.internal.util.reflection.Fields;
 import ru.mail.track.message.messagetypes.Message;
 
 import java.lang.reflect.Constructor;

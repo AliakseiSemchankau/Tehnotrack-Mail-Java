@@ -1,4 +1,4 @@
-package ru.mail.track.net;
+package ru.mail.track.net.protocol;
 
 import ru.mail.track.message.messagetypes.Message;
 

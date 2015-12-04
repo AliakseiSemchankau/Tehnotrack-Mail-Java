@@ -1,7 +1,5 @@
-package ru.mail.track.net;
+package ru.mail.track.net.io;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import ru.mail.track.message.messagetypes.ChatCreateMessage;
 import ru.mail.track.message.messagetypes.ChatFindMessage;
 import ru.mail.track.message.messagetypes.ChatHistoryMessage;
@@ -18,7 +16,6 @@ import ru.mail.track.perform.CommandType;
 
 import java.io.IOException;
 import java.net.Socket;
-import java.util.Arrays;
 import java.util.Scanner;
 
 /**

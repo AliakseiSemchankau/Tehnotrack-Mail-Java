@@ -5,6 +5,9 @@ import org.junit.Test;
 import ru.mail.track.message.messagetypes.ChatSendMessage;
 import ru.mail.track.message.messagetypes.LoginMessage;
 import ru.mail.track.message.messagetypes.Message;
+import ru.mail.track.net.protocol.Protocol;
+import ru.mail.track.net.protocol.ReflectionProtocol;
+import ru.mail.track.net.protocol.SerializableProtocol;
 import ru.mail.track.perform.CommandType;
 
 import java.util.HashMap;

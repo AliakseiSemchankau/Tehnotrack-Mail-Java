@@ -1,4 +1,4 @@
-package ru.mail.track.net;
+package ru.mail.track.net.protocol;
 
 import ru.mail.track.message.messagetypes.Message;
 import ru.mail.track.message.messagetypes.SimpleMessage;
@@ -8,8 +8,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Created by aliakseisemchankau on 10.11.15.
@@ -30,6 +28,7 @@ public class SerializableProtocol implements Protocol {
 
     @Override
     public byte[] encode(Message msg) {
+
         try {
             ByteArrayOutputStream bos = new ByteArrayOutputStream();
             ObjectOutputStream oos = new ObjectOutputStream(bos);

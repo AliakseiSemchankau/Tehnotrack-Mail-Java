@@ -2,7 +2,8 @@ package ru.mail.track.session;
 
 import ru.mail.track.message.messagetypes.Message;
 import ru.mail.track.message.User;
-import ru.mail.track.net.ConnectionHandler;
+import ru.mail.track.net.Server;
+import ru.mail.track.net.io.ConnectionHandler;
 import ru.mail.track.net.SessionManager;
 
 /**
@@ -13,23 +14,28 @@ public class Session {
 
     private Long id;
     private User sessionUser;
-    private ConnectionHandler connectionHandler;
+    //private ConnectionHandler connectionHandler;
     private SessionManager sessionManager;
+    private Server server;
 
     public Session() {
+    }
+
+    public void setServer(Server server) {
+        this.server = server;
     }
 
     public SessionManager getSessionManager() {
         return sessionManager;
     }
 
-    public ConnectionHandler getConnectionHandler() {
-        return connectionHandler;
-    }
+    //public ConnectionHandler getConnectionHandler() {
+    //    return connectionHandler;
+    //}
 
-    public void setConnectionHandler(ConnectionHandler connectionHandler) {
-        this.connectionHandler = connectionHandler;
-    }
+    //public void setConnectionHandler(ConnectionHandler connectionHandler) {
+    //    this.connectionHandler = connectionHandler;
+    //}
 
     public Session(Long id) {
         this.id = id;
@@ -58,7 +64,8 @@ public class Session {
 
     public void send(Message msg) throws Exception{
 
-        connectionHandler.send(msg);
+        //connectionHandler.send(msg);
+        server.send(msg, this.id);
 
     }
 

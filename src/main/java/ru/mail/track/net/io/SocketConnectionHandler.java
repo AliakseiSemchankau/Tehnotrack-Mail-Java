@@ -1,4 +1,4 @@
-package ru.mail.track.net;
+package ru.mail.track.net.io;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -11,10 +11,9 @@ import java.util.List;
 ////////import org.slf4j.Logger;
 ////////import org.slf4j.LoggerFactory;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import ru.mail.track.message.messagetypes.Message;
-import ru.mail.track.message.messagetypes.SimpleMessage;
+import ru.mail.track.net.protocol.Protocol;
+import ru.mail.track.net.protocol.SerializableProtocol;
 
 /**
  * Класс работающий с сокетом, умеет отправлять данные в сокет
