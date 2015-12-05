@@ -41,7 +41,7 @@ public class NioServer implements Server{
 
     // The host:port combination to listen on
     private final InetAddress hostAddress = null;
-    private int port = 19001;
+    private int port = 19002;
 
     // The channel on which we'll accept connections
     private ServerSocketChannel serverChannel;
@@ -163,7 +163,7 @@ public class NioServer implements Server{
         // Hand the data off to our worker thread
         //worker.processData(this, socketChannel, this.readBuffer.array(), numRead);
         Message msg = protocol.decode(this.readBuffer.array());
-        System.out.println("\nNIOSERVER::READ::" + msg + "\n");
+        //System.err.println("\nNIOSERVER::READ::" + msg + "\n");
         Long id = channelSessions.get(socketChannel);
         Result result = commandHandler.work(msg, sessionManager.getSession(id));
         send(socketChannel, protocol.encode(new SimpleMessage(result.toString())));
@@ -179,7 +179,7 @@ public class NioServer implements Server{
             while (!queue.isEmpty()) {
                 byte[] data = (byte[]) queue.get(0);
                 ByteBuffer buf = ByteBuffer.wrap(Packer.pack(data));
-                //System.out.println("we write:\n" + new String(buf.array()));
+                //System.err.println("we write:\n" + new String(buf.array()));
                // System.err.println("&\n");
                // for(int i  = 0; i < buf.array().length; ++i) {
                //     System.err.println(buf.array()[i]);
@@ -203,7 +203,6 @@ public class NioServer implements Server{
         }
     }
 
-
     @Override
     public void send(Message msg, Long sessionId) {
         byte[] data = protocol.encode(msg);
@@ -212,9 +211,10 @@ public class NioServer implements Server{
     }
 
     @Override
-    public void startServer() throws Exception {
+    public void startServer() {
         while (!Thread.currentThread().isInterrupted()) {
             try {
+
                 // Process any pending changes
                 synchronized(changeRequests) {
                     Iterator changes = this.changeRequests.iterator();
@@ -261,11 +261,26 @@ public class NioServer implements Server{
     }
 
     @Override
-    public void destroyServer() throws Exception {
-        serverChannel.close();
+    public void destroyServer() {
+        try {
+            serverChannel.close();
+        } catch (IOException ioExc) {
+            System.err.println("couldn't close serverChannel for " + serverChannel.toString());
+            ioExc.printStackTrace();
+        }
         for(SocketChannel socketChannel : socketChannels.values()) {
-            socketChannel.close();
-            selector.close();
+            try {
+                socketChannel.close();
+            } catch (IOException ioExc) {
+                System.err.println("couldn't close socketChannel " + socketChannel.toString());
+                ioExc.printStackTrace();
+            }
+            try {
+                selector.close();
+            } catch (IOException ioExc) {
+                System.err.println("couldn't close selector " + selector.toString());
+                ioExc.printStackTrace();
+            }
         }
     }
 

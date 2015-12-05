@@ -9,8 +9,8 @@ public interface Server {
 
     void send(Message msg, Long sessionId);
 
-    void startServer() throws Exception;
+    void startServer();
 
-    void destroyServer() throws Exception;
+    void destroyServer();
 }
 

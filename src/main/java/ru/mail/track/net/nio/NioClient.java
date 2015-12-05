@@ -52,11 +52,11 @@ public class NioClient {
     //static Logger log = LoggerFactory.getLogger(NioClient.class);
 
 
-    public static final int PORT = 19001;
+    public static final int PORT = 19002;
 
     private Selector selector;
     private SocketChannel channel;
-    private ByteBuffer buffer = ByteBuffer.allocate(1);
+    private ByteBuffer buffer = ByteBuffer.allocate(256);
     private boolean flagInterrupt = false;
     List<Byte> data = new ArrayList<>();
 
@@ -64,8 +64,31 @@ public class NioClient {
 
     // TODO: Нужно создать блокирующую очередь, в которую складывать данные для обмена между потоками
 
-    public void init() {
+    private Message result;
 
+    public Message getResult() {
+        return result;
+    }
+
+    public void addLineInQueue(String line) {
+        synchronized (queue) {
+            try {
+                //System.err.println("line=" + line);
+                queue.put(line);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+
+        // Будим селектор
+        SelectionKey key = channel.keyFor(selector);
+        System.out.println("wake up: " + key.hashCode());
+        key.interestOps(SelectionKey.OP_WRITE);
+        selector.wakeup();
+
+    }
+
+    public void init() {
 
         // Слушаем ввод данных с консоли
         Thread t = new Thread(() -> {
@@ -88,11 +111,8 @@ public class NioClient {
                         ioExc.printStackTrace();
                     }
 
-
                     Thread.currentThread().interrupt();
-
                     System.out.println("Exit!");
-
                 }
 
                 if (Thread.currentThread().isInterrupted()) {
@@ -101,20 +121,9 @@ public class NioClient {
 
                 // TODO: здесь нужно сложить прочитанные данные в очередь
 
-                synchronized (queue) {
-                    try {
-                        queue.put(line);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
+                addLineInQueue(line);
 
-                    }
-                }
 
-                // Будим селектор
-                SelectionKey key = channel.keyFor(selector);
-                System.out.println("wake up: " + key.hashCode());
-                key.interestOps(SelectionKey.OP_WRITE);
-                selector.wakeup();
             }
         });
         t.start();
@@ -132,12 +141,8 @@ public class NioClient {
             exc.printStackTrace();
         }
 
-        boolean isDownloading = false;
-        long length = 0;
-
         while (!flagInterrupt) {
-
-
+            //System.err.println("we're doing smth");
             // System.out.println("Waiting on select()...");
             try {
                 selector.select();
@@ -145,14 +150,16 @@ public class NioClient {
                 System.err.println("couldn't make selector.select()");
                 exc.printStackTrace();
             }
+            //System.err.println("kek");
             // System.out.println("Raised {} events" + num);
 
 
             if (flagInterrupt) {
                 break;
             }
+            //System.err.println("kek2");
             Iterator<SelectionKey> keyIterator = selector.selectedKeys().iterator();
-
+            //System.err.println("kek3");
             while (keyIterator.hasNext()) {
 
 
@@ -160,110 +167,126 @@ public class NioClient {
                 keyIterator.remove();
 
                 if (sKey.isConnectable()) {
-                    //System.out.println("[connectable] {}" + sKey.hashCode());
-
-                    try {
-                        channel.finishConnect();
-                    } catch (IOException ioExc) {
-                        System.err.println("couldn't finish connection for channel " + channel.toString());
-                        ioExc.printStackTrace();
-                    }
-                    // теперь в канал можно писать
-                    sKey.interestOps(SelectionKey.OP_WRITE);
+                    System.out.println("[connectable] {}" + sKey.hashCode());
+                    connect(sKey);
                 } else if (sKey.isReadable()) {
-                    //System.out.println("[readable]");
-
-                    buffer.clear();
-                    int numRead = -1;
-                    try {
-                        numRead = channel.read(buffer);
-                    } catch (IOException ioExc) {
-                        System.err.println("couldn't read buffer from channel " + channel.toString());
-                    }
-                    buffer.flip();
-
-                    if (numRead < 0) {
-                        //System.err.println("break, lol");
-                        break;
-                    }
-
-                    //System.out.println("From server: {}" + new String(buffer.array()));
-                    //buffer.clear();
-                    //buffer.fl
-
-                    byte[] info = buffer.array();
-                    for (byte b : info) {
-                        data.add(new Byte(b));
-                    }
-
-                    if (!isDownloading && data.size() >= 8) {
-                        length = Packer.defineLength(data);
-                        isDownloading = true;
-                    }
-
-                    if (data.size() >= length + 8) {
-                        byte[] byteData = new byte[data.size()];
-                        for (int i = 0; i < data.size(); ++i) {
-                            byteData[i] = data.get(i);
-                        }
-
-                        Message msg = protocol.decode(Packer.unpack(byteData));
-                        if (msg instanceof ChatSendMessage) {
-                            ChatSendMessage chmsg = (ChatSendMessage) msg;
-                            System.out.println();
-                            System.out.println("chat id=" + chmsg.getChatId());
-                            System.out.println("sender id=" + chmsg.getSender());
-                            System.out.println("timestamp=" + chmsg.getTimeStamp());
-                            System.out.println("message=" + chmsg.getMessage());
-                            System.out.println();
-                        } else {
-                            System.out.printf("\nNIOCLIENT:\n %s\n", msg.getMessage());
-                        }
-                        data = new ArrayList<>();
-                        isDownloading = false;
-
-                    }
-
-                    //sKey.cancel();
-                    //channel.close();
-
+                    System.out.println("[readable]");
+                    read(sKey);
                 } else if (sKey.isWritable()) {
-
                     System.out.println("[writable]");
-
-                    //TODO: здесь нужно вытащить данные из очереди и отдать их на сервер
-
-                    //byte[] userInput =
-                    //channel.write(ByteBuffer.wrap(userInput));
-
-                    synchronized (queue) {
-
-                        while (!queue.isEmpty()) {
-
-                            // System.out.println(queue.size() + "=queue.size()");
-                            String line = queue.poll();
-                            //System.out.println(queue.size() + "=queue.size() now");
-
-                            try {
-                                Message msg = processInput(line);
-                                if (msg != null) {
-                                    try {
-                                        channel.write(ByteBuffer.wrap(protocol.encode(msg)));
-                                    } catch (IOException ioExc) {
-                                        System.err.println("couldn't write message " + msg + " to channel " + channel.toString());
-                                    }
-                                }
-                            } catch (IllegalArgumentException iaExc) {
-                                System.err.println("illegal input=" + line);
-                            }
-                        }
-                    }
-                    // Ждем записи в канал
-                    sKey.interestOps(SelectionKey.OP_READ);
+                    write(sKey);
                 }
             }
 
         }
+    }
+
+    private void connect(SelectionKey sKey) {
+        try {
+            channel.finishConnect();
+        } catch (IOException ioExc) {
+            System.err.println("couldn't finish connection for channel " + channel.toString());
+            ioExc.printStackTrace();
+        }
+        // теперь в канал можно писать
+        sKey.interestOps(SelectionKey.OP_WRITE);
+    }
+
+    private boolean isDownloading = false;
+    private long length = 0;
+
+    private void read(SelectionKey sKey) {
+
+        buffer.clear();
+        int numRead = -1;
+        try {
+            numRead = channel.read(buffer);
+        } catch (IOException ioExc) {
+            System.err.println("couldn't read buffer from channel " + channel.toString());
+        }
+        buffer.flip();
+
+        if (numRead < 0)
+            //System.err.println("break, lol");
+            return;
+
+        System.out.println("client red: " + numRead);
+
+        //System.out.println("From server: {}" + new String(buffer.array()));
+        //buffer.clear();
+        //buffer.fl
+
+
+        for (int i = 0; i < numRead; ++i) {
+            data.add(buffer.array()[i]);
+        }
+
+        if (!isDownloading && data.size() >= 8) {
+            length = Packer.defineLength(data);
+            isDownloading = true;
+        }
+
+        if (data.size() >= length + 8) {
+            byte[] byteData = new byte[data.size()];
+            for (int i = 0; i < data.size(); ++i) {
+                byteData[i] = data.get(i);
+            }
+
+            Message msg = protocol.decode(Packer.unpack(byteData));
+            if (msg instanceof ChatSendMessage) {
+                ChatSendMessage chmsg = (ChatSendMessage) msg;
+                System.out.println();
+                System.out.println("chat id=" + chmsg.getChatId());
+                System.out.println("sender id=" + chmsg.getSender());
+                System.out.println("timestamp=" + chmsg.getTimeStamp());
+                System.out.println("message=" + chmsg.getMessage());
+                System.out.println();
+            } else {
+                System.out.printf("\nNIOCLIENT:\n %s\n", msg.getMessage());
+            }
+            result = msg;
+            data = new ArrayList<>();
+            isDownloading = false;
+        }
+
+        //sKey.cancel();
+        //channel.close();
+
+    }
+
+    private void write(SelectionKey sKey) {
+        //System.out.println("[writable]");
+
+        //TODO: здесь нужно вытащить данные из очереди и отдать их на сервер
+
+        //byte[] userInput =
+        //channel.write(ByteBuffer.wrap(userInput));
+
+        synchronized (queue) {
+
+            while (!queue.isEmpty()) {
+
+                // System.out.println(queue.size() + "=queue.size()");
+                String line = queue.poll();
+                //System.out.println(queue.size() + "=queue.size() now");
+
+                try {
+                    Message msg = processInput(line);
+                    if (msg != null) {
+                        try {
+                            //System.err.println("CLIENT::WRITE::" + msg.toString());
+                            channel.write(ByteBuffer.wrap(protocol.encode(msg)));
+                        } catch (IOException ioExc) {
+                            System.err.println("couldn't write message " + msg + " to channel " + channel.toString());
+                        }
+                    }
+                } catch (IllegalArgumentException iaExc) {
+                    System.err.println("illegal input=" + line);
+                }
+            }
+        }
+        // Ждем записи в канал
+        sKey.interestOps(SelectionKey.OP_READ);
     }
 
     public static void main(String[] args) {
