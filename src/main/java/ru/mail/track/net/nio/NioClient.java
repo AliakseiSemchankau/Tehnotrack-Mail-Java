@@ -17,6 +17,7 @@ import ru.mail.track.net.protocol.SerializableProtocol;
 import ru.mail.track.perform.CommandType;
 import sun.security.util.Length;
 
+import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
@@ -56,25 +57,46 @@ public class NioClient {
     private Selector selector;
     private SocketChannel channel;
     private ByteBuffer buffer = ByteBuffer.allocate(1);
-
+    private boolean flagInterrupt = false;
     List<Byte> data = new ArrayList<>();
 
     BlockingQueue<String> queue = new ArrayBlockingQueue<>(2);
 
     // TODO: Нужно создать блокирующую очередь, в которую складывать данные для обмена между потоками
 
-
-    public void init() throws Exception {
+    public void init() {
 
 
         // Слушаем ввод данных с консоли
         Thread t = new Thread(() -> {
             Scanner scanner = new Scanner(System.in);
-            while (true) {
+            while (!Thread.currentThread().isInterrupted()) {
                 String line = scanner.nextLine();
                 if ("q".equals(line)) {
+                    flagInterrupt = true;
+
+                    try {
+                        selector.close();
+                    } catch (IOException ioExc) {
+                        System.err.println("couldn't close selector");
+                        ioExc.printStackTrace();
+                    }
+                    try {
+                        channel.close();
+                    } catch (IOException ioExc) {
+                        System.err.println("couldn't close channel");
+                        ioExc.printStackTrace();
+                    }
+
+
+                    Thread.currentThread().interrupt();
+
                     System.out.println("Exit!");
-                    System.exit(0);
+
+                }
+
+                if (Thread.currentThread().isInterrupted()) {
+                    break;
                 }
 
                 // TODO: здесь нужно сложить прочитанные данные в очередь
@@ -98,23 +120,39 @@ public class NioClient {
         t.start();
 
 
-        selector = Selector.open();
-        channel = SocketChannel.open();
-        channel.configureBlocking(false);
-        channel.register(selector, SelectionKey.OP_CONNECT);
+        try {
+            selector = Selector.open();
+            channel = SocketChannel.open();
+            channel.configureBlocking(false);
+            channel.register(selector, SelectionKey.OP_CONNECT);
 
-        channel.connect(new InetSocketAddress("localhost", PORT));
+            channel.connect(new InetSocketAddress("localhost", PORT));
+        } catch (Exception exc) {
+            System.err.println("mistake with selector or channel");
+            exc.printStackTrace();
+        }
 
         boolean isDownloading = false;
         long length = 0;
 
-        while (true) {
+        while (!flagInterrupt) {
+
+
             // System.out.println("Waiting on select()...");
-            int num = selector.select();
+            try {
+                selector.select();
+            } catch (Exception exc) {
+                System.err.println("couldn't make selector.select()");
+                exc.printStackTrace();
+            }
             // System.out.println("Raised {} events" + num);
 
 
+            if (flagInterrupt) {
+                break;
+            }
             Iterator<SelectionKey> keyIterator = selector.selectedKeys().iterator();
+
             while (keyIterator.hasNext()) {
 
 
@@ -124,15 +162,24 @@ public class NioClient {
                 if (sKey.isConnectable()) {
                     //System.out.println("[connectable] {}" + sKey.hashCode());
 
-                    channel.finishConnect();
-
+                    try {
+                        channel.finishConnect();
+                    } catch (IOException ioExc) {
+                        System.err.println("couldn't finish connection for channel " + channel.toString());
+                        ioExc.printStackTrace();
+                    }
                     // теперь в канал можно писать
                     sKey.interestOps(SelectionKey.OP_WRITE);
                 } else if (sKey.isReadable()) {
                     //System.out.println("[readable]");
 
                     buffer.clear();
-                    int numRead = channel.read(buffer);
+                    int numRead = -1;
+                    try {
+                        numRead = channel.read(buffer);
+                    } catch (IOException ioExc) {
+                        System.err.println("couldn't read buffer from channel " + channel.toString());
+                    }
                     buffer.flip();
 
                     if (numRead < 0) {
@@ -188,17 +235,23 @@ public class NioClient {
 
                     //byte[] userInput =
                     //channel.write(ByteBuffer.wrap(userInput));
+
                     synchronized (queue) {
 
                         while (!queue.isEmpty()) {
+
                             // System.out.println(queue.size() + "=queue.size()");
                             String line = queue.poll();
                             //System.out.println(queue.size() + "=queue.size() now");
 
                             try {
                                 Message msg = processInput(line);
-                                if (line != null) {
-                                    channel.write(ByteBuffer.wrap(protocol.encode(msg)));
+                                if (msg != null) {
+                                    try {
+                                        channel.write(ByteBuffer.wrap(protocol.encode(msg)));
+                                    } catch (IOException ioExc) {
+                                        System.err.println("couldn't write message " + msg + " to channel " + channel.toString());
+                                    }
                                 }
                             } catch (IllegalArgumentException iaExc) {
                                 System.err.println("illegal input=" + line);
@@ -209,15 +262,16 @@ public class NioClient {
                     sKey.interestOps(SelectionKey.OP_READ);
                 }
             }
+
         }
     }
 
-    public static void main(String[] args) throws Exception {
+    public static void main(String[] args) {
         NioClient client = new NioClient();
         client.init();
     }
 
-    public Message processInput(String line) throws Exception {
+    public Message processInput(String line) throws IllegalArgumentException {
 
         String[] tokens = line.split(" ");
         //log.info("Tokens: {}", Arrays.toString(tokens));

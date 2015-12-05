@@ -65,10 +65,10 @@ public class NioServer implements Server{
         //this.port = port;
         this.commandHandler = commandHandler;
         selector = initSelector();
-        this.worker = new EchoWorker();
-        this.worker.setCommandHandler(commandHandler);
-        Thread t = new Thread(worker);
-        t.start();
+        //this.worker = new EchoWorker();
+        //this.worker.setCommandHandler(commandHandler);
+        //Thread t = new Thread(worker);
+        //t.start();
     }
 
     private Selector initSelector() throws IOException {
@@ -213,7 +213,7 @@ public class NioServer implements Server{
 
     @Override
     public void startServer() throws Exception {
-        while (true) {
+        while (!Thread.currentThread().isInterrupted()) {
             try {
                 // Process any pending changes
                 synchronized(changeRequests) {
@@ -262,7 +262,11 @@ public class NioServer implements Server{
 
     @Override
     public void destroyServer() throws Exception {
-
+        serverChannel.close();
+        for(SocketChannel socketChannel : socketChannels.values()) {
+            socketChannel.close();
+            selector.close();
+        }
     }
 
 

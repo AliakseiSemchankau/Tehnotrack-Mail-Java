@@ -48,6 +48,7 @@ public class Main {
             Scanner scanner = new Scanner(System.in);
             String query = scanner.next();
             if ("q".equals(query)) {
+                thread.interrupt();
                 server.destroyServer();
                 thread.join();
                 return;

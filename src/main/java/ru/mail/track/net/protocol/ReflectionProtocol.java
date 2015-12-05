@@ -16,12 +16,13 @@ public class ReflectionProtocol implements Protocol {
         String code = new String(bytes);
         String[] parts = code.split("-");
         String clazzName = parts[0];
+
         Class clazz = null;
 
-        ClassLoader classLoader = this.getClass().getClassLoader();
+        System.out.println(System.getProperty("user.dir"));
 
         try {
-            clazz = classLoader.loadClass(clazzName);
+            clazz = Class.forName(clazzName);
         } catch (ClassNotFoundException cnfExc) {
             System.err.println("can't load class with name=" + clazzName);
             cnfExc.printStackTrace();
